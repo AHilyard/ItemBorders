@@ -1,0 +1,4 @@
+{
+	"containerborder": "coremod/AbstractContainerScreenBorder.js",
+	"guiborder": "coremod/GuiBorder.js"
+}

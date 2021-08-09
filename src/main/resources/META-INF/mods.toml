@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[37,)"
+license="MIT"
+
+[[mods]]
+modId="itemborders"
+version="${file.jarVersion}"
+displayName="Item Borders"
+displayURL="https://anthonyhilyard.com/"
+updateJSONURL=""
+logoFile="icon.png"
+authors="Grend"
+description="Adds colored borders around items to indicate rarity."
+
+[[dependencies.itemborders]]
+	modId="forge"
+	mandatory=true
+	versionRange="[37,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.itemborders]]
+	modId="minecraft"
+	mandatory=true
+	versionRange="[1.17.1,1.18)"
+	ordering="NONE"
+	side="BOTH"
