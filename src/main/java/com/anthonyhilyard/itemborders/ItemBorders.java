@@ -2,9 +2,11 @@ package com.anthonyhilyard.itemborders;
 
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fmlclient.gui.GuiUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -56,14 +58,46 @@ public class ItemBorders
 
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
-		int color = item.getRarity().color.getColor();
+		TextColor color = item.getDisplayName().getStyle().getColor();
+
+		// Some mods override the item's getName method to apply different rarity colors,
+		// so let's use that color if it is available.
+		if (item.getItem() != null &&
+			item.getItem().getName(item) != null &&
+			item.getItem().getName(item).getStyle() != null &&
+			item.getItem().getName(item).getStyle().getColor() != null)
+		{
+			color = item.getItem().getName(item).getStyle().getColor();
+		}
+
+		// If the color is null, default to white.
+		if (color == null)
+		{
+			color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
+		}
+
+		// Bail if this item has white text and we are ignoring "common" rarities.
+		// I have to do it by color instead of rarity since modded items often use common rarities in conjunction with modded rarity levels.
+		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon.get())
+		{
+			return;
+		}
 
 		Matrix4f matrix = poseStack.last().pose();
 
 		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color | 0x00000000, color | 0xEE000000);
-		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color | 0x00000000, color | 0xEE000000);
-		GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color | 0xEE000000, color | 0xEE000000);
+		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
+		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
+
+		// Use rounded corners by default.
+		if (!ItemBordersConfig.INSTANCE.squareCorners.get())
+		{
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+		}
+		else
+		{
+			GuiUtils.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+		}
 		bufferSource.endBatch();
 	}
 }
