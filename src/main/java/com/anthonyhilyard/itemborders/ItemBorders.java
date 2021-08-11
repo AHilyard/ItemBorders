@@ -58,6 +58,12 @@ public class ItemBorders
 			color = item.getItem().getName(item).getStyle().getColor();
 		}
 
+		// If the color is null, default to white.
+		if (color == null)
+		{
+			color = Color.fromLegacyFormat(TextFormatting.WHITE);
+		}
+
 		if (color.getValue() == TextFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon.get())
 		{
 			return;
