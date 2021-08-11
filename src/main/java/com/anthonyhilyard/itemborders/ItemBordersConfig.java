@@ -20,6 +20,7 @@ public class ItemBordersConfig
 
 	public final BooleanValue hotBar;
 	public final BooleanValue showForCommon;
+	public final BooleanValue squareCorners;
 
 	public ItemBordersConfig(ForgeConfigSpec.Builder build)
 	{
@@ -27,7 +28,8 @@ public class ItemBordersConfig
 
 		hotBar = build.comment("If the hotbar should display item borders.").define("hotbar", true);
 		showForCommon = build.comment("If item borders should show for common items.").define("show_for_common", false);
-		
+		squareCorners = build.comment("If the borders should have square corners.").define("square_corners", false);
+
 		build.pop().pop();
 	}
 

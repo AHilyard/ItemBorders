@@ -68,12 +68,21 @@ public class ItemBorders
 		matrixStack.pushPose();
 		matrixStack.translate(0, 0, 100);
 		Matrix4f matrix = matrixStack.last().pose();
-		//matrix.setIdentity();
 
 		IRenderTypeBuffer.Impl bufferSource = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
 		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
 		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
-		GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+
+		// Use rounded corners by default.
+		if (!ItemBordersConfig.INSTANCE.squareCorners.get())
+		{
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+		}
+		else
+		{
+			GuiUtils.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+		}
+
 		bufferSource.endBatch();
 		matrixStack.popPose();
 	}
