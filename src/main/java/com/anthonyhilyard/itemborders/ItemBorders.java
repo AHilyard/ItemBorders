@@ -48,14 +48,22 @@ public class ItemBorders
 			return;
 		}
 
+		// Grab the standard display color.  This generally will be the rarity color.
 		Color color = item.getDisplayName().getStyle().getColor();
 
+		// Some mods override the getName() method of the Item class, so grab that color if it's there.
 		if (item.getItem() != null &&
 			item.getItem().getName(item) != null &&
 			item.getItem().getName(item).getStyle() != null &&
 			item.getItem().getName(item).getStyle().getColor() != null)
 		{
 			color = item.getItem().getName(item).getStyle().getColor();
+		}
+
+		// Finally, if the item has a special hover name color (Stored in NBT), use that.
+		if (!item.getHoverName().getStyle().isEmpty())
+		{
+			color = item.getHoverName().getStyle().getColor();
 		}
 
 		// If the color is null, default to white.
@@ -84,6 +92,7 @@ public class ItemBorders
 		{
 			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
 		}
+		// Square looks pretty good too though.
 		else
 		{
 			GuiUtils.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
