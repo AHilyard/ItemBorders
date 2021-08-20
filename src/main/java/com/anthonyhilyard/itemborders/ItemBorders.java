@@ -4,10 +4,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
@@ -49,21 +47,34 @@ public class ItemBorders
 		}
 
 		// Grab the standard display color.  This generally will be the rarity color.
-		Color color = item.getDisplayName().getStyle().getColor();
+		Color color = Color.fromLegacyFormat(TextFormatting.WHITE);
 
-		// Some mods override the getName() method of the Item class, so grab that color if it's there.
-		if (item.getItem() != null &&
-			item.getItem().getName(item) != null &&
-			item.getItem().getName(item).getStyle() != null &&
-			item.getItem().getName(item).getStyle().getColor() != null)
+		// Assign an automatic color based on rarity and custom name colors.
+		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
 		{
-			color = item.getItem().getName(item).getStyle().getColor();
+			color = item.getDisplayName().getStyle().getColor();
+
+			// Some mods override the getName() method of the Item class, so grab that color if it's there.
+			if (item.getItem() != null &&
+				item.getItem().getName(item) != null &&
+				item.getItem().getName(item).getStyle() != null &&
+				item.getItem().getName(item).getStyle().getColor() != null)
+			{
+				color = item.getItem().getName(item).getStyle().getColor();
+			}
+
+			// Finally, if the item has a special hover name color (Stored in NBT), use that.
+			if (!item.getHoverName().getStyle().isEmpty())
+			{
+				color = item.getHoverName().getStyle().getColor();
+			}
 		}
 
-		// Finally, if the item has a special hover name color (Stored in NBT), use that.
-		if (!item.getHoverName().getStyle().isEmpty())
+		// Use manually-specified color if available.
+		Color customColor = ItemBordersConfig.INSTANCE.customBorders().get(item.getItem().getRegistryName());
+		if (customColor != null)
 		{
-			color = item.getHoverName().getStyle().getColor();
+			color = customColor;
 		}
 
 		// If the color is null, default to white.

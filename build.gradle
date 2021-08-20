@@ -53,6 +53,8 @@ repositories {
 dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8:processor'
+
+	implementation fg.deobf('curse.maven:loot-beams-506757:3430983')
 }
 
 jar {
