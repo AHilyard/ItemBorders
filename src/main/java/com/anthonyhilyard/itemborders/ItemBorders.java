@@ -64,7 +64,7 @@ public class ItemBorders
 			}
 
 			// Finally, if the item has a special hover name color (Stored in NBT), use that.
-			if (!item.getHoverName().getStyle().isEmpty())
+			if (!item.getHoverName().getStyle().isEmpty() && item.getHoverName().getStyle().getColor() != null)
 			{
 				color = item.getHoverName().getStyle().getColor();
 			}
