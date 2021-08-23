@@ -25,7 +25,7 @@ mixin {
 
 minecraft {
 	mappings channel: 'official', version: project.mcVersion
-	// accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
 	runs {
 		client = {
 			properties 'forge.logging.markers': ''
