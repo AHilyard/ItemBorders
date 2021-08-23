@@ -1,7 +1,6 @@
 package com.anthonyhilyard.itemborders.mixin;
 
 import com.anthonyhilyard.itemborders.ItemBorders;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,10 +17,10 @@ public class ContainerScreenMixin extends Screen
 {
 	protected ContainerScreenMixin(ITextComponent titleIn) { super(titleIn); }
 
-	@Inject(method = "renderSlot(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/inventory/container/Slot;)V",
+	@Inject(method = "renderSlot(Lnet/minecraft/inventory/container/Slot;)V",
 			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;enableDepthTest()V"))
-	public void renderSlot(MatrixStack matrixStack, Slot slot, CallbackInfo info)
+	public void renderSlot(Slot slot, CallbackInfo info)
 	{
-		ItemBorders.renderBorder(matrixStack, slot);
+		ItemBorders.renderBorder(slot);
 	}
 }

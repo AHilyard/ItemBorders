@@ -7,16 +7,15 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.item.Item;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Color;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import com.electronwill.nightconfig.core.Config;
@@ -39,9 +38,9 @@ public class ItemBordersConfig
 	public final BooleanValue squareCorners;
 	public final BooleanValue automaticBorders;
 	private final ConfigValue<Config> manualBorders;
-	public final BooleanValue lootBeamSync;
+	// public final BooleanValue lootBeamSync;
 
-	private Map<ResourceLocation, Color> cachedCustomBorders = new HashMap<ResourceLocation, Color>();
+	private Map<ResourceLocation, Integer> cachedCustomBorders = new HashMap<ResourceLocation, Integer>();
 	private boolean emptyCache = true;
 
 	public ItemBordersConfig(ForgeConfigSpec.Builder build)
@@ -53,7 +52,7 @@ public class ItemBordersConfig
 		squareCorners = build.comment(" If the borders should have square corners.").define("square_corners", false);
 		automaticBorders = build.comment(" If automatic borders (based on item rarity) should be enabled.").define("auto_borders", true);
 		manualBorders = build.comment(" Custom border colors for specific items.  Format: { <color> = \"item name or #tag\", <color> = [\"list of item names or tags\"]}.  Example: { FCC040 = [\"minecraft:stick\", \"torch\"], lime = \"#ores\"]}").define("manual_borders", Config.of(TomlFormat.instance()), (v) -> validateManualBorders((Config)v));
-		lootBeamSync = build.comment(" If border colors should sync with loot beam colors. (From Loot Beams mod--any custom beams colors specified in Loot Beams configuration will be displayed as borders.)").define("loot_beam_sync", true);
+		// lootBeamSync = build.comment(" If border colors should sync with loot beam colors. (From Loot Beams mod--any custom beams colors specified in Loot Beams configuration will be displayed as borders.)").define("loot_beam_sync", true);
 
 		build.pop().pop();
 	}
@@ -66,10 +65,10 @@ public class ItemBordersConfig
 			// Rebuild border color lists here.
 			Loader.LOGGER.info("Advancement Plaques config reloaded.");
 		}
-		else if (e.getConfig().getModId().equals("lootbeams"))
-		{
-			INSTANCE.emptyCache = true;
-		}
+		// else if (e.getConfig().getModId().equals("lootbeams"))
+		// {
+		// 	INSTANCE.emptyCache = true;
+		// }
 	}
 
 	private static void validateItemPath(String path)
@@ -91,6 +90,21 @@ public class ItemBordersConfig
 		}
 	}
 
+	private static Integer parseColor(String name)
+	{
+		TextFormatting textFormat = TextFormatting.getByName(name);
+		if (textFormat == null)
+		{
+			if ((name.length() == 3 || name.length() == 6 || name.length() == 8) &&
+				name.matches("[0-9A-Fa-f]*"))
+			{
+				return Integer.parseInt(name, 16);
+			}
+			return null;
+		}
+		return textFormat.getColor();
+	}
+
 	private static boolean validateManualBorders(Config v)
 	{
 		if (v == null || v.valueMap() == null)
@@ -102,13 +116,9 @@ public class ItemBordersConfig
 		for (String key : v.valueMap().keySet())
 		{
 			// Check that the key is in the proper format.
-			if (Color.parseColor(key) == null)
+			if (parseColor(key) == null)
 			{
-				// If parsing failed, try again with appending a # first to support hex codes.
-				if (Color.parseColor("#" + key) == null)
-				{
-					Loader.LOGGER.warn("Invalid manual border color found: \"{}\".  This value was ignored.", key);
-				}
+				Loader.LOGGER.warn("Invalid manual border color found: \"{}\".  This value was ignored.", key);
 			}
 
 			Object value = v.valueMap().get(key);
@@ -146,12 +156,12 @@ public class ItemBordersConfig
 		return true;
 	}
 
-	public static void appendManualBordersFromPath(String path, Color color, Map<ResourceLocation, Color> map)
+	public static void appendManualBordersFromPath(String path, int color, Map<ResourceLocation, Integer> map)
 	{
 		// This is a tag so add all applicable items.
 		if (path.startsWith("#"))
 		{
-			ITag<Item> tag = ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation(path.substring(1)));
+			Tag<Item> tag = ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation(path.substring(1)));
 			for (Item item : tag.getValues())
 			{
 				map.put(item.getRegistryName(), color);
@@ -164,8 +174,7 @@ public class ItemBordersConfig
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public Map<ResourceLocation, Color> customBorders()
+	public Map<ResourceLocation, Integer> customBorders()
 	{
 		// Custom border colors need to be lazily loaded since we can't ensure our config is loaded after loot beams (if applicable).
 		if (emptyCache)
@@ -174,31 +183,27 @@ public class ItemBordersConfig
 			cachedCustomBorders.clear();
 			
 			// Generate custom borders now.  Start with Loot Beams stuff.
-			if (lootBeamSync.get() && ModList.get().isLoaded("lootbeams"))
-			{
-				try
-				{
-					cachedCustomBorders.putAll((Map<ResourceLocation, Color>)Class.forName("com.anthonyhilyard.itemborders.LootBeamsHandler").getMethod("getCustomBeams").invoke(null, new Object[]{}));
-				}
-				catch (Exception e)
-				{
-					Loader.LOGGER.warn("Failed to synchronize Loot Beams!");
-				}
-			}
+			// if (lootBeamSync.get() && ModList.get().isLoaded("lootbeams"))
+			// {
+			// 	try
+			// 	{
+			// 		cachedCustomBorders.putAll((Map<ResourceLocation, Color>)Class.forName("com.anthonyhilyard.itemborders.LootBeamsHandler").getMethod("getCustomBeams").invoke(null, new Object[]{}));
+			// 	}
+			// 	catch (Exception e)
+			// 	{
+			// 		Loader.LOGGER.warn("Failed to synchronize Loot Beams!");
+			// 	}
+			// }
 
 			// Now do our own manual stuff.
 			Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
 			for (String key : manualBorderMap.keySet())
 			{
-				Color color = Color.parseColor(key);
+				Integer color = parseColor(key);
 				if (color == null)
 				{
-					color = Color.parseColor("#" + key);
-					if (color == null)
-					{
-						// This item has an invalid color value, so skip it.
-						continue;
-					}
+					// This item has an invalid color value, so skip it.
+					continue;
 				}
 
 				Object value = manualBorderMap.get(key);
