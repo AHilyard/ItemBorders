@@ -1,5 +1,6 @@
 package com.anthonyhilyard.itemborders;
 
+import com.anthonyhilyard.iceberg.util.ItemColor;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraft.client.renderer.Tessellator;
@@ -52,22 +53,7 @@ public class ItemBorders
 		// Assign an automatic color based on rarity and custom name colors.
 		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
 		{
-			color = item.getDisplayName().getStyle().getColor();
-
-			// Some mods override the getName() method of the Item class, so grab that color if it's there.
-			if (item.getItem() != null &&
-				item.getItem().getName(item) != null &&
-				item.getItem().getName(item).getStyle() != null &&
-				item.getItem().getName(item).getStyle().getColor() != null)
-			{
-				color = item.getItem().getName(item).getStyle().getColor();
-			}
-
-			// Finally, if the item has a special hover name color (Stored in NBT), use that.
-			if (!item.getHoverName().getStyle().isEmpty() && item.getHoverName().getStyle().getColor() != null)
-			{
-				color = item.getHoverName().getStyle().getColor();
-			}
+			color = ItemColor.getColorForItem(item, color);
 		}
 
 		// Use manually-specified color if available.

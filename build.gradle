@@ -16,7 +16,6 @@ apply plugin: 'eclipse'
 
 archivesBaseName = name + '-' + project.mcVersion
 
-// java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 mixin {
@@ -25,7 +24,7 @@ mixin {
 
 minecraft {
 	mappings channel: 'official', version: project.mcVersion
-	// accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
 	runs {
 		client = {
 			properties 'forge.logging.markers': ''
@@ -54,6 +53,7 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8:processor'
 
+	compile 'curse.maven:iceberg-520110:3467865'
 	implementation fg.deobf('curse.maven:loot-beams-506757:3430983')
 }
 
@@ -69,5 +69,3 @@ jar {
 					"MixinConfigs": "${project.name.toLowerCase()}.mixins.json"],)
 	}
 }
-
-// jar.finalizedBy('reobfJar')
