@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "com.anthonyhilyard.itemborders.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"refmap": "itemborders.refmap.json",
+	"mixins": [
+		"AbstractContainerScreenMixin",
+		"GuiMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8.4",
+	"target": "@env(DEFAULT)"
+}

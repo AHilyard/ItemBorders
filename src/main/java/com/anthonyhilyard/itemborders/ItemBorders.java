@@ -24,7 +24,6 @@ public class ItemBorders
 
 	public void onClientSetup(FMLClientSetupEvent event)
 	{
-		LOGGER.warn("Item Borders mod is using coremods to modify net/minecraft/client/gui/Gui.renderSlot and net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.renderSlot!  This is not ideal and will be changed to mixins once they are supported for 1.17!");
 	}
 
 	public static void renderBorder(PoseStack poseStack, Slot slot)

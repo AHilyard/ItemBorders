@@ -164,19 +164,6 @@ public class ItemBordersConfig
 			emptyCache = false;
 			cachedCustomBorders.clear();
 			
-			// Generate custom borders now.  Start with Loot Beams stuff.
-			// if (lootBeamSync.get() && ModList.get().isLoaded("lootbeams"))
-			// {
-			// 	try
-			// 	{
-			// 		cachedCustomBorders.putAll((Map<ResourceLocation, Color>)Class.forName("com.anthonyhilyard.itemborders.LootBeamsHandler").getMethod("getCustomBeams").invoke(null, new Object[]{}));
-			// 	}
-			// 	catch (Exception e)
-			// 	{
-			// 		Loader.LOGGER.warn("Failed to synchronize Loot Beams!");
-			// 	}
-			// }
-
 			// Now do our own manual stuff.
 			Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
 			for (String key : manualBorderMap.keySet())
