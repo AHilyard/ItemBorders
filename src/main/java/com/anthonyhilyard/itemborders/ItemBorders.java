@@ -1,29 +1,26 @@
 package com.anthonyhilyard.itemborders;
 
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fmlclient.gui.GuiUtils;
+import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
+import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class ItemBorders
+public class ItemBorders implements ClientModInitializer
 {
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger();
-
-	public void onClientSetup(FMLClientSetupEvent event)
+	@Override
+	public void onInitializeClient()
 	{
+		ItemBordersConfig.init();
 	}
 
 	public static void renderBorder(PoseStack poseStack, Slot slot)
@@ -35,7 +32,7 @@ public class ItemBorders
 	public static void renderBorder(PoseStack poseStack, ItemStack item, int x, int y)
 	{
 		// If borders are enabled for the hotbar...
-		if (ItemBordersConfig.INSTANCE.hotBar.get())
+		if (ItemBordersConfig.INSTANCE.hotBar)
 		{
 			render(new PoseStack(), item, x, y);
 		}
@@ -52,7 +49,7 @@ public class ItemBorders
 		TextColor color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
 
 		// Assign an automatic color based on rarity and custom name colors.
-		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
+		if (ItemBordersConfig.INSTANCE.automaticBorders)
 		{
 			color = item.getDisplayName().getStyle().getColor();
 
@@ -73,7 +70,7 @@ public class ItemBorders
 		}
 
 		// Use manually-specified color if available.
-		TextColor customColor = ItemBordersConfig.INSTANCE.customBorders().get(item.getItem().getRegistryName());
+		TextColor customColor = ItemBordersConfig.INSTANCE.customBorders().get(Registry.ITEM.getKey(item.getItem()));
 		if (customColor != null)
 		{
 			color = customColor;
@@ -85,7 +82,7 @@ public class ItemBorders
 			color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
 		}
 
-		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon.get())
+		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon)
 		{
 			return;
 		}
@@ -97,18 +94,18 @@ public class ItemBorders
 		Matrix4f matrix = poseStack.last().pose();
 
 		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
-		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
+		GuiHelper.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
+		GuiHelper.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
 
 		// Use rounded corners by default.
-		if (!ItemBordersConfig.INSTANCE.squareCorners.get())
+		if (!ItemBordersConfig.INSTANCE.squareCorners)
 		{
-			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+			GuiHelper.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
 		}
 		// Square looks pretty good too though.
 		else
 		{
-			GuiUtils.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+			GuiHelper.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
 		}
 
 		bufferSource.endBatch();

@@ -1,0 +1,50 @@
+{
+	"schemaVersion": 1,
+	"id": "itemborders",
+	"version": "${version}",
+
+	"name": "Item Borders",
+	"description": "Adds colored borders around items to indicate rarity.",
+	"authors": [ "Grend" ],
+	"contact": {
+		"homepage": "https://anthonyhilyard.com/",
+		"sources": "https://github.com/AHilyard/ItemBorders",
+		"discord": "https://discord.gg/S5NQjbXPnb"
+	},
+
+	"license": "CC BY-NC-ND 4.0",
+	"icon": "icon.png",
+
+	"environment": "client",
+
+	"entrypoints": {
+		"client": [
+			"com.anthonyhilyard.itemborders.ItemBorders"
+		]
+	 },
+
+	"mixins": [
+		"itemborders.mixins.json"
+	],
+
+	"depends": {
+		"fabricloader": ">=0.11.6",
+		"fabric": "*",
+		"minecraft": "1.17.x",
+		"java": ">=16",
+		"cloth-config2": ">=5.0",
+		"iceberg": ">=1.0.19"
+	},
+	"custom": {
+		"modupdater": {
+			"strategy": "curseforge",
+			"projectID": 541604,
+			"strict": false
+		},
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/S5NQjbXPnb"
+			}
+		}
+	}
+}

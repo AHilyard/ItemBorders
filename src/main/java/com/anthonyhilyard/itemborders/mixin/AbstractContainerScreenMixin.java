@@ -18,8 +18,7 @@ public class AbstractContainerScreenMixin extends Screen
 {
 	protected AbstractContainerScreenMixin(Component titleIn) { super(titleIn); }
 
-	@Inject(method = "renderSlot(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/inventory/Slot;)V",
-			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;enableDepthTest()V"))
+	@Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;enableDepthTest()V", remap = false))
 	public void renderSlot(PoseStack poseStack, Slot slot, CallbackInfo info)
 	{
 		ItemBorders.renderBorder(poseStack, slot);

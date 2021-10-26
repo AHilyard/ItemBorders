@@ -1,72 +1,67 @@
 package com.anthonyhilyard.itemborders;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.toml.TomlFormat;
-
-import org.apache.commons.lang3.tuple.Pair;
-
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.IConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
-public class ItemBordersConfig
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonPrimitive;
+
+@Config(name = Loader.MODID)
+public class ItemBordersConfig implements ConfigData
 {
-	public static final ForgeConfigSpec SPEC;
-	public static final ItemBordersConfig INSTANCE;
-	static
+	@ConfigEntry.Gui.Excluded
+	public static ItemBordersConfig INSTANCE;
+
+	public static void init()
 	{
-		Config.setInsertionOrderPreserved(true);
-		Pair<ItemBordersConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ItemBordersConfig::new);
-		SPEC = specPair.getRight();
-		INSTANCE = specPair.getLeft();
+		AutoConfig.register(ItemBordersConfig.class, JanksonConfigSerializer::new);
+		INSTANCE = AutoConfig.getConfigHolder(ItemBordersConfig.class).getConfig();
 	}
 
-	public final BooleanValue hotBar;
-	public final BooleanValue showForCommon;
-	public final BooleanValue squareCorners;
-	public final BooleanValue automaticBorders;
-	private final ConfigValue<Config> manualBorders;
+	@Comment("If the hotbar should display item borders.")
+	public boolean hotBar = true;
+	@Comment("If item borders should show for common items.")
+	public boolean showForCommon = false;
+	@Comment("If the borders should have square corners.")
+	public boolean squareCorners = false;
+	@Comment("If automatic borders (based on item rarity) should be enabled.")
+	public boolean automaticBorders = true;
+	@ConfigEntry.Gui.CollapsibleObject
+	@Comment("Custom border colors for specific items.  Format: { \"<color>\" = [\"list of item names or tags\"] }.  Example: { \"FCC040\" = [\"minecraft:stick\", \"torch\"] }")
+	private Map<String, List<String>> manualBorders = new HashMap<String, List<String>>();
 
-	private Map<ResourceLocation, TextColor> cachedCustomBorders = new HashMap<ResourceLocation, TextColor>();
-	private boolean emptyCache = true;
+	@ConfigEntry.Gui.Excluded
+	private transient Map<ResourceLocation, TextColor> cachedCustomBorders = new HashMap<ResourceLocation, TextColor>();
+	@ConfigEntry.Gui.Excluded
+	private transient boolean emptyCache = true;
 
-	public ItemBordersConfig(ForgeConfigSpec.Builder build)
+	@Override
+	public void validatePostLoad()
 	{
-		build.comment("Client Configuration").push("client").push("options");
-
-		hotBar = build.comment(" If the hotbar should display item borders.").define("hotbar", true);
-		showForCommon = build.comment(" If item borders should show for common items.").define("show_for_common", false);
-		squareCorners = build.comment(" If the borders should have square corners.").define("square_corners", false);
-		automaticBorders = build.comment(" If automatic borders (based on item rarity) should be enabled.").define("auto_borders", true);
-		manualBorders = build.comment(" Custom border colors for specific items.  Format: { <color> = \"item name or #tag\", <color> = [\"list of item names or tags\"]}.  Example: { FCC040 = [\"minecraft:stick\", \"torch\"], lime = \"#ores\"]}").define("manual_borders", Config.of(TomlFormat.instance()), (v) -> validateManualBorders((Config)v));
-
-		build.pop().pop();
-	}
-
-	@SubscribeEvent
-	public static void onLoad(IConfigEvent e)
-	{
-		if (e.getConfig().getModId().equals(Loader.MODID))
+		if (!validateManualBorders(manualBorders))
 		{
-			Loader.LOGGER.info("Advancement Plaques config reloaded.");
+			// Invalid, do something about it.
+			Loader.LOGGER.warn("Invalid manual borders found in config!");
 		}
 	}
 
 	private static void validateItemPath(String path)
 	{
-		if (!path.startsWith("#") && !ForgeRegistries.ITEMS.containsKey(new ResourceLocation(path)))
+		if (!path.startsWith("#") && !Registry.ITEM.containsKey(new ResourceLocation(path)))
 		{
 			// This isn't a validation failure, just a warning.
 			Loader.LOGGER.warn("Item \"{}\" not found when parsing manual border colors!", path);
@@ -83,15 +78,15 @@ public class ItemBordersConfig
 		}
 	}
 
-	private static boolean validateManualBorders(Config v)
+	private static boolean validateManualBorders(Map<String, List<String>> v)
 	{
-		if (v == null || v.valueMap() == null)
+		if (v == null || v.isEmpty())
 		{
-			return false;
+			return true;
 		}
 
 		// Note that if there is a non-null config value, this validation function always returns true because the entire collection is cleared otherwise, which sucks.
-		for (String key : v.valueMap().keySet())
+		for (String key : v.keySet())
 		{
 			// Check that the key is in the proper format.
 			if (TextColor.parseColor(key) == null)
@@ -103,38 +98,19 @@ public class ItemBordersConfig
 				}
 			}
 
-			Object value = v.valueMap().get(key);
-
-			// Value can be a single item or a list of them.
-			if (value instanceof String)
+			List<String> valueList = v.get(key);
+			
+			List<String> convertedList = new ArrayList<String>();
+			for (Object val : valueList)
 			{
+				String stringVal = ((JsonPrimitive)val).asString();
 				// Check for item with this path.
-				validateItemPath((String)value);
+				validateItemPath(stringVal);
+				convertedList.add(stringVal);
 			}
-			else if (value instanceof List<?>)
-			{
-				List<?> valueList = (List<?>) value;
-				for (Object stringVal : valueList)
-				{
-					if (stringVal instanceof String)
-					{
-						// Check for item with this path.
-						validateItemPath((String)stringVal);
-					}
-					else
-					{
-						Loader.LOGGER.warn("Invalid manual border item path or tag found: \"{}\".  This value was ignored.", stringVal);
-					}
-				}
-			}
-			else
-			{
-				Loader.LOGGER.warn("Invalid manual border item path or tag found: \"{}\".  This value was ignored.", value);
-			}
+			v.put(key, convertedList);
 		}
 
-		// Empty the cache so it is regenerated on the next border draw.
-		INSTANCE.emptyCache = true;
 		return true;
 	}
 
@@ -146,7 +122,7 @@ public class ItemBordersConfig
 			Tag<Item> tag = ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation(path.substring(1)));
 			for (Item item : tag.getValues())
 			{
-				map.put(item.getRegistryName(), color);
+				map.put(Registry.ITEM.getKey(item), color);
 			}
 		}
 		// Just a single item.
@@ -165,8 +141,7 @@ public class ItemBordersConfig
 			cachedCustomBorders.clear();
 			
 			// Now do our own manual stuff.
-			Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
-			for (String key : manualBorderMap.keySet())
+			for (String key : manualBorders.keySet())
 			{
 				TextColor color = TextColor.parseColor(key);
 				if (color == null)
@@ -179,22 +154,13 @@ public class ItemBordersConfig
 					}
 				}
 
-				Object value = manualBorderMap.get(key);
+				List<String> valueList = manualBorders.get(key);
 
-				// Value can be a single item/tag or a list of them.
-				if (value instanceof String)
+				for (Object stringVal : valueList)
 				{
-					appendManualBordersFromPath((String)value, color, cachedCustomBorders);
-				}
-				else if (value instanceof List<?>)
-				{
-					List<?> valueList = (List<?>) value;
-					for (Object stringVal : valueList)
+					if (stringVal instanceof String)
 					{
-						if (stringVal instanceof String)
-						{
-							appendManualBordersFromPath((String)stringVal, color, cachedCustomBorders);
-						}
+						appendManualBordersFromPath((String)stringVal, color, cachedCustomBorders);
 					}
 				}
 			}
@@ -202,5 +168,4 @@ public class ItemBordersConfig
 
 		return cachedCustomBorders;
 	}
-
 }
