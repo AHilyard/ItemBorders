@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -70,7 +69,7 @@ public class ItemBorders implements ClientModInitializer
 		}
 
 		// Use manually-specified color if available.
-		TextColor customColor = ItemBordersConfig.INSTANCE.customBorders().get(Registry.ITEM.getKey(item.getItem()));
+		TextColor customColor = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
 		if (customColor != null)
 		{
 			color = customColor;

@@ -5,13 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.world.item.Item;
+import com.anthonyhilyard.iceberg.util.Selectors;
 
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.ItemStack;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
@@ -41,11 +38,18 @@ public class ItemBordersConfig implements ConfigData
 	@Comment("If automatic borders (based on item rarity) should be enabled.")
 	public boolean automaticBorders = true;
 	@ConfigEntry.Gui.CollapsibleObject
-	@Comment("Custom border colors for specific items.  Format: { \"<color>\" = [\"list of item names or tags\"] }.  Example: { \"FCC040\" = [\"minecraft:stick\", \"torch\"] }")
+	@Comment("Custom border colors for specific items.  Format: { \"<color>\" = [\"list of selectors\"] }.  Selectors supported:\n" + 
+			 "  Item name - Use item name for vanilla items or include mod name for modded items.  Examples: \"minecraft:stick\", \"iron_ore\"\n" +
+			 "  Tag - $ followed by tag name.  Examples: \"$minecraft:stone\" or \"$planks\"\n" +
+			 "  Mod name - @ followed by mod identifier.  Examples: \"@spoiledeggs\"\n" +
+			 "  Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: \"!common\", \"!uncommon\", \"!rare\", \"!epic\"\n" +
+			 "  Item name color - # followed by color hex code, the hex code must match exactly.  Examples: \"#23F632\"\n" +
+			 "  Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: \"%[Uncommon]\"\n" +
+			 "  Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: \"^Legendary\"")
 	private Map<String, List<String>> manualBorders = new HashMap<String, List<String>>();
 
 	@ConfigEntry.Gui.Excluded
-	private transient Map<ResourceLocation, TextColor> cachedCustomBorders = new HashMap<ResourceLocation, TextColor>();
+	private transient Map<ItemStack, TextColor> cachedCustomBorders = new HashMap<ItemStack, TextColor>();
 	@ConfigEntry.Gui.Excluded
 	private transient boolean emptyCache = true;
 
@@ -56,25 +60,6 @@ public class ItemBordersConfig implements ConfigData
 		{
 			// Invalid, do something about it.
 			Loader.LOGGER.warn("Invalid manual borders found in config!");
-		}
-	}
-
-	private static void validateItemPath(String path)
-	{
-		if (!path.startsWith("#") && !Registry.ITEM.containsKey(new ResourceLocation(path)))
-		{
-			// This isn't a validation failure, just a warning.
-			Loader.LOGGER.warn("Item \"{}\" not found when parsing manual border colors!", path);
-		}
-		else if (path.startsWith("#") && ItemTags.getAllTags().getTag(new ResourceLocation(path.substring(1))) == null)
-		{
-			// The list of tags may be empty since both configs and tags are loaded during static initialization.
-			// If the list ISN'T empty, we can warn about invalid tags.
-			if (!ItemTags.getAllTags().getAllTags().isEmpty())
-			{
-				// This isn't a validation failure, just a warning.
-				Loader.LOGGER.warn("Tag \"{}\" not found when parsing manual border colors!", path);
-			}
 		}
 	}
 
@@ -92,7 +77,8 @@ public class ItemBordersConfig implements ConfigData
 			if (TextColor.parseColor(key) == null)
 			{
 				// If parsing failed, try again with appending a # first to support hex codes.
-				if (TextColor.parseColor("#" + key) == null)
+				if ((key.replace("0x", "").length() == 6 && TextColor.parseColor("#" + key.replace("0x", "")) == null) ||
+					(key.replace("0x", "").length() == 8 && TextColor.parseColor("#" + key.toLowerCase().replace("0xff", "")) == null))
 				{
 					Loader.LOGGER.warn("Invalid manual border color found: \"{}\".  This value was ignored.", key);
 				}
@@ -104,8 +90,6 @@ public class ItemBordersConfig implements ConfigData
 			for (Object val : valueList)
 			{
 				String stringVal = ((JsonPrimitive)val).asString();
-				// Check for item with this path.
-				validateItemPath(stringVal);
 				convertedList.add(stringVal);
 			}
 			v.put(key, convertedList);
@@ -114,58 +98,57 @@ public class ItemBordersConfig implements ConfigData
 		return true;
 	}
 
-	public static void appendManualBordersFromPath(String path, TextColor color, Map<ResourceLocation, TextColor> map)
+	public TextColor getBorderColorForItem(ItemStack item)
 	{
-		// This is a tag so add all applicable items.
-		if (path.startsWith("#"))
-		{
-			Tag<Item> tag = ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation(path.substring(1)));
-			for (Item item : tag.getValues())
-			{
-				map.put(Registry.ITEM.getKey(item), color);
-			}
-		}
-		// Just a single item.
-		else
-		{
-			map.put(new ResourceLocation(path), color);
-		}
-	}
-
-	public Map<ResourceLocation, TextColor> customBorders()
-	{
-		// Custom border colors need to be lazily loaded since we can't ensure our config is loaded after loot beams (if applicable).
+		// Clear the cache first if we have to.
 		if (emptyCache)
 		{
 			emptyCache = false;
 			cachedCustomBorders.clear();
-			
-			// Now do our own manual stuff.
-			for (String key : manualBorders.keySet())
+		}
+
+		if (cachedCustomBorders.containsKey(item))
+		{
+			return cachedCustomBorders.get(item);
+		}
+
+		for (String key : manualBorders.keySet())
+		{
+			TextColor color = TextColor.parseColor(key);
+			if (color == null)
 			{
-				TextColor color = TextColor.parseColor(key);
-				if (color == null)
+				if (key.replace("0x", "").length() == 6)
 				{
-					color = TextColor.parseColor("#" + key);
-					if (color == null)
-					{
-						// This item has an invalid color value, so skip it.
-						continue;
-					}
+					color = TextColor.parseColor("#" + key.replace("0x", ""));
+				}
+				else if (key.replace("0x", "").length() == 8)
+				{
+					color = TextColor.parseColor("#" + key.toLowerCase().replace("0xff", ""));
 				}
 
-				List<String> valueList = manualBorders.get(key);
-
-				for (Object stringVal : valueList)
+				if (color == null)
 				{
-					if (stringVal instanceof String)
+					// This item has an invalid color value, so skip it.
+					continue;
+				}
+			}
+
+			List<String> selectorList = manualBorders.get(key);
+
+			for (Object selector : selectorList)
+			{
+				if (selector instanceof String)
+				{
+					if (Selectors.itemMatches(item, (String)selector))
 					{
-						appendManualBordersFromPath((String)stringVal, color, cachedCustomBorders);
+						cachedCustomBorders.put(item, color);
+						return color;
 					}
 				}
 			}
 		}
 
-		return cachedCustomBorders;
+		cachedCustomBorders.put(item, null);
+		return null;
 	}
 }
