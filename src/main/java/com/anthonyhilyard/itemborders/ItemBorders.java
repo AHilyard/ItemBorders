@@ -1,6 +1,5 @@
 package com.anthonyhilyard.itemborders;
 
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fmlclient.gui.GuiUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,18 +13,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class ItemBorders
 {
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger();
-
-	public void onClientSetup(FMLClientSetupEvent event)
-	{
-	}
-
 	public static void renderBorder(PoseStack poseStack, Slot slot)
 	{
 		// Container GUIs.
@@ -73,7 +62,7 @@ public class ItemBorders
 		}
 
 		// Use manually-specified color if available.
-		TextColor customColor = ItemBordersConfig.INSTANCE.customBorders().get(item.getItem().getRegistryName());
+		TextColor customColor = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
 		if (customColor != null)
 		{
 			color = customColor;

@@ -4,23 +4,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.anthonyhilyard.iceberg.util.Selectors;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.toml.TomlFormat;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.IConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
+@Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.MOD)
 public class ItemBordersConfig
 {
 	public static final ForgeConfigSpec SPEC;
@@ -39,7 +39,7 @@ public class ItemBordersConfig
 	public final BooleanValue automaticBorders;
 	private final ConfigValue<Config> manualBorders;
 
-	private Map<ResourceLocation, TextColor> cachedCustomBorders = new HashMap<ResourceLocation, TextColor>();
+	private Map<ItemStack, TextColor> cachedCustomBorders = new HashMap<ItemStack, TextColor>();
 	private boolean emptyCache = true;
 
 	public ItemBordersConfig(ForgeConfigSpec.Builder build)
@@ -48,68 +48,74 @@ public class ItemBordersConfig
 
 		hotBar = build.comment(" If the hotbar should display item borders.").define("hotbar", true);
 		showForCommon = build.comment(" If item borders should show for common items.").define("show_for_common", false);
-		squareCorners = build.comment(" If the borders should have square corners.").define("square_corners", false);
+		squareCorners = build.comment(" If the borders should have square corners.").define("square_corners", true);
 		automaticBorders = build.comment(" If automatic borders (based on item rarity) should be enabled.").define("auto_borders", true);
-		manualBorders = build.comment(" Custom border colors for specific items.  Format: { <color> = \"item name or #tag\", <color> = [\"list of item names or tags\"]}.  Example: { FCC040 = [\"minecraft:stick\", \"torch\"], lime = \"#ores\"]}").define("manual_borders", Config.of(TomlFormat.instance()), (v) -> validateManualBorders((Config)v));
-
+		manualBorders = build.comment(" Custom border colors for specific items. Format: { <color> = [\"list of selectors\"] }. Selectors supported:\n" +
+									  "    Item name - Use item name for vanilla items or include mod name for modded items.  Examples: minecraft:stick, iron_ore\n" +
+									  "    Tag - $ followed by tag name.  Examples: $forge:stone or $planks\n" +
+									  "    Mod name - @ followed by mod identifier.  Examples: @spoiledeggs\n" +
+									  "    Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: !uncommon, !rare, !epic\n" +
+									  "    Item name color - # followed by color hex code, the hex code must match exactly.  Examples: #23F632\n" +
+									  "    Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: %[Uncommon]\n" +
+									  "    Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: ^Rarity: Legendary").define("manual_borders", Config.of(TomlFormat.instance()), (v) -> true);
 		build.pop().pop();
 	}
 
 	@SubscribeEvent
-	public static void onLoad(IConfigEvent e)
+	public static void onReload(ModConfigEvent.Reloading e)
 	{
 		if (e.getConfig().getModId().equals(Loader.MODID))
 		{
-			Loader.LOGGER.info("Advancement Plaques config reloaded.");
+			// Clear the frame level cache in case anything has changed.
+			INSTANCE.emptyCache = true;
 		}
 	}
 
-	private static void validateItemPath(String path)
+	public TextColor getBorderColorForItem(ItemStack item)
 	{
-		if (!path.startsWith("#") && !ForgeRegistries.ITEMS.containsKey(new ResourceLocation(path)))
+		// Clear the cache first if we have to.
+		if (emptyCache)
 		{
-			// This isn't a validation failure, just a warning.
-			Loader.LOGGER.warn("Item \"{}\" not found when parsing manual border colors!", path);
-		}
-		else if (path.startsWith("#") && ItemTags.getAllTags().getTag(new ResourceLocation(path.substring(1))) == null)
-		{
-			// The list of tags may be empty since both configs and tags are loaded during static initialization.
-			// If the list ISN'T empty, we can warn about invalid tags.
-			if (!ItemTags.getAllTags().getAllTags().isEmpty())
-			{
-				// This isn't a validation failure, just a warning.
-				Loader.LOGGER.warn("Tag \"{}\" not found when parsing manual border colors!", path);
-			}
-		}
-	}
-
-	private static boolean validateManualBorders(Config v)
-	{
-		if (v == null || v.valueMap() == null)
-		{
-			return false;
+			emptyCache = false;
+			cachedCustomBorders.clear();
 		}
 
-		// Note that if there is a non-null config value, this validation function always returns true because the entire collection is cleared otherwise, which sucks.
-		for (String key : v.valueMap().keySet())
+		if (cachedCustomBorders.containsKey(item))
 		{
-			// Check that the key is in the proper format.
-			if (TextColor.parseColor(key) == null)
+			return cachedCustomBorders.get(item);
+		}
+
+		Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
+		for (String key : manualBorderMap.keySet())
+		{
+			TextColor color = TextColor.parseColor(key);
+			if (color == null)
 			{
-				// If parsing failed, try again with appending a # first to support hex codes.
-				if (TextColor.parseColor("#" + key) == null)
+				if (key.replace("0x", "").length() == 6)
 				{
-					Loader.LOGGER.warn("Invalid manual border color found: \"{}\".  This value was ignored.", key);
+					color = TextColor.parseColor("#" + key.replace("0x", ""));
+				}
+				else if (key.replace("0x", "").length() == 8)
+				{
+					color = TextColor.parseColor("#" + key.toLowerCase().replace("0xff", ""));
+				}
+
+				if (color == null)
+				{
+					// This item has an invalid color value, so skip it.
+					continue;
 				}
 			}
 
-			Object value = v.valueMap().get(key);
+			Object value = manualBorderMap.get(key);
 
-			// Value can be a single item or a list of them.
 			if (value instanceof String)
 			{
-				// Check for item with this path.
-				validateItemPath((String)value);
+				if (Selectors.itemMatches(item, (String)value))
+				{
+					cachedCustomBorders.put(item, color);
+					return color;
+				}
 			}
 			else if (value instanceof List<?>)
 			{
@@ -118,89 +124,17 @@ public class ItemBordersConfig
 				{
 					if (stringVal instanceof String)
 					{
-						// Check for item with this path.
-						validateItemPath((String)stringVal);
-					}
-					else
-					{
-						Loader.LOGGER.warn("Invalid manual border item path or tag found: \"{}\".  This value was ignored.", stringVal);
-					}
-				}
-			}
-			else
-			{
-				Loader.LOGGER.warn("Invalid manual border item path or tag found: \"{}\".  This value was ignored.", value);
-			}
-		}
-
-		// Empty the cache so it is regenerated on the next border draw.
-		INSTANCE.emptyCache = true;
-		return true;
-	}
-
-	public static void appendManualBordersFromPath(String path, TextColor color, Map<ResourceLocation, TextColor> map)
-	{
-		// This is a tag so add all applicable items.
-		if (path.startsWith("#"))
-		{
-			Tag<Item> tag = ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation(path.substring(1)));
-			for (Item item : tag.getValues())
-			{
-				map.put(item.getRegistryName(), color);
-			}
-		}
-		// Just a single item.
-		else
-		{
-			map.put(new ResourceLocation(path), color);
-		}
-	}
-
-	public Map<ResourceLocation, TextColor> customBorders()
-	{
-		// Custom border colors need to be lazily loaded since we can't ensure our config is loaded after loot beams (if applicable).
-		if (emptyCache)
-		{
-			emptyCache = false;
-			cachedCustomBorders.clear();
-			
-			// Now do our own manual stuff.
-			Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
-			for (String key : manualBorderMap.keySet())
-			{
-				TextColor color = TextColor.parseColor(key);
-				if (color == null)
-				{
-					color = TextColor.parseColor("#" + key);
-					if (color == null)
-					{
-						// This item has an invalid color value, so skip it.
-						continue;
-					}
-				}
-
-				Object value = manualBorderMap.get(key);
-
-				// Value can be a single item/tag or a list of them.
-				if (value instanceof String)
-				{
-					appendManualBordersFromPath((String)value, color, cachedCustomBorders);
-				}
-				else if (value instanceof List<?>)
-				{
-					List<?> valueList = (List<?>) value;
-					for (Object stringVal : valueList)
-					{
-						if (stringVal instanceof String)
+						if (Selectors.itemMatches(item, (String)stringVal))
 						{
-							appendManualBordersFromPath((String)stringVal, color, cachedCustomBorders);
+							cachedCustomBorders.put(item, color);
+							return color;
 						}
 					}
 				}
 			}
 		}
 
-		return cachedCustomBorders;
+		cachedCustomBorders.put(item, null);
+		return null;
 	}
-
 }
