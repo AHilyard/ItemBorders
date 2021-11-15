@@ -2,6 +2,7 @@ package com.anthonyhilyard.itemborders;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class ItemBordersConfig implements ConfigData
 	@Comment("If automatic borders (based on item rarity) should be enabled.")
 	public boolean automaticBorders = true;
 	@ConfigEntry.Gui.CollapsibleObject
-	@Comment("Custom border colors for specific items.  Format: { \"<color>\" = [\"list of selectors\"] }.  Selectors supported:\n" + 
+	@Comment("Custom border colors for specific items.  Format: { \"<color>\": [\"list of selectors\"] }.  Selectors supported:\n" + 
 			 "  Item name - Use item name for vanilla items or include mod name for modded items.  Examples: \"minecraft:stick\", \"iron_ore\"\n" +
 			 "  Tag - $ followed by tag name.  Examples: \"$minecraft:stone\" or \"$planks\"\n" +
 			 "  Mod name - @ followed by mod identifier.  Examples: \"@spoiledeggs\"\n" +
@@ -46,7 +47,7 @@ public class ItemBordersConfig implements ConfigData
 			 "  Item name color - # followed by color hex code, the hex code must match exactly.  Examples: \"#23F632\"\n" +
 			 "  Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: \"%[Uncommon]\"\n" +
 			 "  Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: \"^Legendary\"")
-	private Map<String, List<String>> manualBorders = new HashMap<String, List<String>>();
+	private Map<String, List<String>> manualBorders = new LinkedHashMap<String, List<String>>();
 
 	@ConfigEntry.Gui.Excluded
 	private transient Map<ItemStack, TextColor> cachedCustomBorders = new HashMap<ItemStack, TextColor>();
