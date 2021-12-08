@@ -1,6 +1,6 @@
 package com.anthonyhilyard.itemborders;
 
-import net.minecraftforge.fmlclient.gui.GuiUtils;
+import net.minecraftforge.client.gui.GuiUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
