@@ -6,9 +6,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.iceberg.util.Selectors;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
@@ -32,12 +35,25 @@ public class ItemBordersConfig implements ConfigData
 
 	@Comment("If the hotbar should display item borders.")
 	public boolean hotBar = true;
+	
 	@Comment("If item borders should show for common items.")
 	public boolean showForCommon = false;
+
 	@Comment("If the borders should have square corners.")
 	public boolean squareCorners = false;
+
+	@Comment("If the borders should fully envelop item slots (otherwise they will only show on the bottom portion of the slot).")
+	public boolean fullBorder = false;
+
+	@Comment("If the borders draw over items instead of under.")
+	public boolean overItems = false;
+
+	@Comment("If the borders should have a more prominent glow.")
+	public boolean extraGlow = false;
+
 	@Comment("If automatic borders (based on item rarity) should be enabled.")
 	public boolean automaticBorders = true;
+
 	@ConfigEntry.Gui.CollapsibleObject
 	@Comment("Custom border colors for specific items.  Format: { \"<color>\": [\"list of selectors\"] }.  Selectors supported:\n" + 
 			 "  Item name - Use item name for vanilla items or include mod name for modded items.  Examples: \"minecraft:stick\", \"iron_ore\"\n" +
@@ -49,8 +65,10 @@ public class ItemBordersConfig implements ConfigData
 			 "  Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: \"^Legendary\"")
 	private Map<String, List<String>> manualBorders = new LinkedHashMap<String, List<String>>();
 
+	private record ItemKey(Item item, CompoundTag tag) {}
+
 	@ConfigEntry.Gui.Excluded
-	private transient Map<ItemStack, TextColor> cachedCustomBorders = new HashMap<ItemStack, TextColor>();
+	private transient Map<ItemKey, TextColor> cachedCustomBorders = new HashMap<ItemKey, TextColor>();
 	@ConfigEntry.Gui.Excluded
 	private transient boolean emptyCache = true;
 
@@ -101,6 +119,8 @@ public class ItemBordersConfig implements ConfigData
 
 	public TextColor getBorderColorForItem(ItemStack item)
 	{
+		ItemKey itemKey = new ItemKey(item.getItem(), item.getTag());
+
 		// Clear the cache first if we have to.
 		if (emptyCache)
 		{
@@ -108,9 +128,9 @@ public class ItemBordersConfig implements ConfigData
 			cachedCustomBorders.clear();
 		}
 
-		if (cachedCustomBorders.containsKey(item))
+		if (cachedCustomBorders.containsKey(itemKey))
 		{
-			return cachedCustomBorders.get(item);
+			return cachedCustomBorders.get(itemKey);
 		}
 
 		for (String key : manualBorders.keySet())
@@ -142,14 +162,22 @@ public class ItemBordersConfig implements ConfigData
 				{
 					if (Selectors.itemMatches(item, (String)selector))
 					{
-						cachedCustomBorders.put(item, color);
+						cachedCustomBorders.put(itemKey, color);
 						return color;
 					}
 				}
 			}
 		}
 
-		cachedCustomBorders.put(item, null);
-		return null;
+		TextColor color = null;
+
+		// Assign an automatic color based on rarity and custom name colors.
+		if (ItemBordersConfig.INSTANCE.automaticBorders)
+		{
+			color = ItemColor.getColorForItem(item, null);
+		}
+
+		cachedCustomBorders.put(itemKey, color);
+		return color;
 	}
 }
