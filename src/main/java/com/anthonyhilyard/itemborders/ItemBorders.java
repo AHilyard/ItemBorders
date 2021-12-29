@@ -37,36 +37,7 @@ public class ItemBorders
 			return;
 		}
 
-		// Grab the standard display color.  This generally will be the rarity color.
-		TextColor color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
-
-		// Assign an automatic color based on rarity and custom name colors.
-		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
-		{
-			color = item.getDisplayName().getStyle().getColor();
-
-			// Some mods override the getName() method of the Item class, so grab that color if it's there.
-			if (item.getItem() != null &&
-				item.getItem().getName(item) != null &&
-				item.getItem().getName(item).getStyle() != null &&
-				item.getItem().getName(item).getStyle().getColor() != null)
-			{
-				color = item.getItem().getName(item).getStyle().getColor();
-			}
-
-			// Finally, if the item has a special hover name color (Stored in NBT), use that.
-			if (!item.getHoverName().getStyle().isEmpty() && item.getHoverName().getStyle().getColor() != null)
-			{
-				color = item.getHoverName().getStyle().getColor();
-			}
-		}
-
-		// Use manually-specified color if available.
-		TextColor customColor = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
-		if (customColor != null)
-		{
-			color = customColor;
-		}
+		TextColor color = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
 
 		// If the color is null, default to white.
 		if (color == null)
@@ -82,22 +53,37 @@ public class ItemBorders
 		RenderSystem.disableDepthTest();
 
 		poseStack.pushPose();
-		poseStack.translate(0, 0, 100);
+		poseStack.translate(0, 0, ItemBordersConfig.INSTANCE.overItems.get() ? 290 : 100);
 		Matrix4f matrix = poseStack.last().pose();
 
-		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
-		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
+		int startColor = color.getValue() | 0xEE000000;
+		int endColor = color.getValue() & 0x00FFFFFF;
 
-		// Use rounded corners by default.
-		if (!ItemBordersConfig.INSTANCE.squareCorners.get())
+		int topColor = ItemBordersConfig.INSTANCE.fullBorder.get() ? startColor : endColor;
+		int bottomColor = startColor;
+
+		int xOffset = ItemBordersConfig.INSTANCE.squareCorners.get() ? 0 : 1;
+
+		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
+		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
+
+		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
+		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
+
+		if (ItemBordersConfig.INSTANCE.extraGlow.get())
 		{
-			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
-		}
-		// Square looks pretty good too though.
-		else
-		{
-			GuiUtils.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+			int topAlpha = ((topColor >> 24) & 0xFF) / 3;
+			int bottomAlpha = ((bottomColor >> 24) & 0xFF) / 3;
+
+			int topGlowColor = (topAlpha << 24) | (topColor & 0x00FFFFFF);
+			int bottomGlowColor = (bottomAlpha << 24) | (bottomColor & 0x00FFFFFF);
+
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,      y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
+			GuiUtils.drawGradientRect(matrix, -1, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
+
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 1, x + 15, y + 2, topGlowColor, topGlowColor);
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
 		}
 
 		bufferSource.endBatch();

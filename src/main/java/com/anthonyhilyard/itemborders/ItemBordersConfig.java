@@ -4,13 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.iceberg.util.Selectors;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.toml.TomlFormat;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
@@ -36,10 +39,15 @@ public class ItemBordersConfig
 	public final BooleanValue hotBar;
 	public final BooleanValue showForCommon;
 	public final BooleanValue squareCorners;
+	public final BooleanValue fullBorder;
+	public final BooleanValue overItems;
+	public final BooleanValue extraGlow;
 	public final BooleanValue automaticBorders;
 	private final ConfigValue<Config> manualBorders;
 
-	private Map<ItemStack, TextColor> cachedCustomBorders = new HashMap<ItemStack, TextColor>();
+	private record ItemKey(Item item, CompoundTag tag) {}
+
+	private Map<ItemKey, TextColor> cachedCustomBorders = new HashMap<ItemKey, TextColor>();
 	private boolean emptyCache = true;
 
 	public ItemBordersConfig(ForgeConfigSpec.Builder build)
@@ -49,6 +57,9 @@ public class ItemBordersConfig
 		hotBar = build.comment(" If the hotbar should display item borders.").define("hotbar", true);
 		showForCommon = build.comment(" If item borders should show for common items.").define("show_for_common", false);
 		squareCorners = build.comment(" If the borders should have square corners.").define("square_corners", true);
+		fullBorder = build.comment(" If the borders should fully envelop item slots (otherwise they will only show on the bottom portion of the slot).").define("full_border", false);
+		overItems = build.comment(" If the borders draw over items instead of under.").define("over_items", false);
+		extraGlow = build.comment(" If the borders should have a more prominent glow.").define("extra_glow", false);
 		automaticBorders = build.comment(" If automatic borders (based on item rarity) should be enabled.").define("auto_borders", true);
 		manualBorders = build.comment(" Custom border colors for specific items. Format: { <color> = [\"list of selectors\"] }. Selectors supported:\n" +
 									  "    Item name - Use item name for vanilla items or include mod name for modded items.  Examples: minecraft:stick, iron_ore\n" +
@@ -73,6 +84,8 @@ public class ItemBordersConfig
 
 	public TextColor getBorderColorForItem(ItemStack item)
 	{
+		ItemKey itemKey = new ItemKey(item.getItem(), item.getTag());
+
 		// Clear the cache first if we have to.
 		if (emptyCache)
 		{
@@ -80,9 +93,9 @@ public class ItemBordersConfig
 			cachedCustomBorders.clear();
 		}
 
-		if (cachedCustomBorders.containsKey(item))
+		if (cachedCustomBorders.containsKey(itemKey))
 		{
-			return cachedCustomBorders.get(item);
+			return cachedCustomBorders.get(itemKey);
 		}
 
 		Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
@@ -113,7 +126,7 @@ public class ItemBordersConfig
 			{
 				if (Selectors.itemMatches(item, (String)value))
 				{
-					cachedCustomBorders.put(item, color);
+					cachedCustomBorders.put(itemKey, color);
 					return color;
 				}
 			}
@@ -126,7 +139,7 @@ public class ItemBordersConfig
 					{
 						if (Selectors.itemMatches(item, (String)stringVal))
 						{
-							cachedCustomBorders.put(item, color);
+							cachedCustomBorders.put(itemKey, color);
 							return color;
 						}
 					}
@@ -134,7 +147,15 @@ public class ItemBordersConfig
 			}
 		}
 
-		cachedCustomBorders.put(item, null);
-		return null;
+		TextColor color = null;
+
+		// Assign an automatic color based on rarity and custom name colors.
+		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
+		{
+			color = ItemColor.getColorForItem(item, null);
+		}
+
+		cachedCustomBorders.put(itemKey, color);
+		return color;
 	}
 }
