@@ -1,19 +1,17 @@
 package com.anthonyhilyard.itemborders;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Color;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import com.lootbeams.Configuration;
 
 public class LootBeamsHandler
 {
-	public static Map<ResourceLocation, Color> getCustomBeams()
+	public static Map<String, Color> getCustomBeams()
 	{
-		Map<ResourceLocation, Color> customBeams = new HashMap<ResourceLocation, Color>();
+		Map<String, Color> customBeams = new LinkedHashMap<String, Color>();
 		
 		for (String value : Configuration.COLOR_OVERRIDES.get())
 		{
@@ -40,19 +38,12 @@ public class LootBeamsHandler
 				// Standard modid:item path.
 				if (name.contains(":"))
 				{
-					ItemBordersConfig.appendManualBordersFromPath(name, color, customBeams);
+					customBeams.put(name, color);
 				}
-				// No mod ID, so we assume this is a mod ID.
+				// No colon, so we assume this is a mod ID.
 				else
 				{
-					// Add all items from mod to cache.
-					for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys())
-					{
-						if (key.getNamespace().equals(name))
-						{
-							customBeams.put(key, color);
-						}
-					}
+					customBeams.put("@" + name, color);
 				}
 			}
 		}

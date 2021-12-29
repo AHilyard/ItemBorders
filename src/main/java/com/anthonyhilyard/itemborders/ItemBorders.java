@@ -1,7 +1,5 @@
 package com.anthonyhilyard.itemborders;
 
-import com.anthonyhilyard.iceberg.util.ItemColor;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -13,18 +11,8 @@ import net.minecraft.util.text.TextFormatting;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class ItemBorders
 {
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger();
-
-	public void onClientSetup(FMLClientSetupEvent event)
-	{
-	}
-
 	public static void renderBorder(MatrixStack matrixStack, Slot slot)
 	{
 		// Container GUIs.
@@ -47,21 +35,7 @@ public class ItemBorders
 			return;
 		}
 
-		// Grab the standard display color.  This generally will be the rarity color.
-		Color color = Color.fromLegacyFormat(TextFormatting.WHITE);
-
-		// Assign an automatic color based on rarity and custom name colors.
-		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
-		{
-			color = ItemColor.getColorForItem(item, color);
-		}
-
-		// Use manually-specified color if available.
-		Color customColor = ItemBordersConfig.INSTANCE.customBorders().get(item.getItem().getRegistryName());
-		if (customColor != null)
-		{
-			color = customColor;
-		}
+		Color color = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
 
 		// If the color is null, default to white.
 		if (color == null)
@@ -77,22 +51,37 @@ public class ItemBorders
 		RenderSystem.disableDepthTest();
 
 		matrixStack.pushPose();
-		matrixStack.translate(0, 0, 100);
+		matrixStack.translate(0, 0, ItemBordersConfig.INSTANCE.overItems.get() ? 290 : 100);
 		Matrix4f matrix = matrixStack.last().pose();
 
-		IRenderTypeBuffer.Impl bufferSource = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
-		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, color.getValue() | 0x00000000, color.getValue() | 0xEE000000);
+		int startColor = color.getValue() | 0xEE000000;
+		int endColor = color.getValue() & 0x00FFFFFF;
 
-		// Use rounded corners by default.
-		if (!ItemBordersConfig.INSTANCE.squareCorners.get())
+		int topColor = ItemBordersConfig.INSTANCE.fullBorder.get() ? startColor : endColor;
+		int bottomColor = startColor;
+
+		int xOffset = ItemBordersConfig.INSTANCE.squareCorners.get() ? 0 : 1;
+
+		IRenderTypeBuffer.Impl bufferSource = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
+		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
+
+		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
+		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
+
+		if (ItemBordersConfig.INSTANCE.extraGlow.get())
 		{
-			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 15, x + 15, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
-		}
-		// Square looks pretty good too though.
-		else
-		{
-			GuiUtils.drawGradientRect(matrix, -1, x,  y + 15, x + 16, y + 16, color.getValue() | 0xEE000000, color.getValue() | 0xEE000000);
+			int topAlpha = ((topColor >> 24) & 0xFF) / 3;
+			int bottomAlpha = ((bottomColor >> 24) & 0xFF) / 3;
+
+			int topGlowColor = (topAlpha << 24) | (topColor & 0x00FFFFFF);
+			int bottomGlowColor = (bottomAlpha << 24) | (bottomColor & 0x00FFFFFF);
+
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,      y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
+			GuiUtils.drawGradientRect(matrix, -1, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
+
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 1, x + 15, y + 2, topGlowColor, topGlowColor);
+			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
 		}
 
 		bufferSource.endBatch();

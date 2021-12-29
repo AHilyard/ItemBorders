@@ -14,7 +14,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 
-archivesBaseName = name + '-' + project.mcVersion
+archivesBaseName = project.name + '-' + project.mcVersion
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
@@ -45,7 +45,6 @@ repositories {
 		name = "CurseMaven"
 		url "https://www.cursemaven.com"
 	}
-	mavenCentral()
 }
 
 
@@ -53,7 +52,7 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8:processor'
 
-	compile 'curse.maven:iceberg-520110:3467865'
+	compile fg.deobf('curse.maven:iceberg-520110:3584898')
 	implementation fg.deobf('curse.maven:loot-beams-506757:3430983')
 }
 
