@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.anthonyhilyard.iceberg.config.IcebergConfig;
+import com.anthonyhilyard.iceberg.config.IcebergConfigSpec;
 import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.iceberg.util.Selectors;
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.toml.TomlFormat;
-
-import org.apache.commons.lang3.tuple.Pair;
+import com.anthonyhilyard.iceberg.util.Selectors.SelectorDocumentation;
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextColor;
@@ -24,17 +24,10 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 @Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.MOD)
-public class ItemBordersConfig
+public class ItemBordersConfig extends IcebergConfig<ItemBordersConfig>
 {
-	public static final ForgeConfigSpec SPEC;
-	public static final ItemBordersConfig INSTANCE;
-	static
-	{
-		Config.setInsertionOrderPreserved(true);
-		Pair<ItemBordersConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ItemBordersConfig::new);
-		SPEC = specPair.getRight();
-		INSTANCE = specPair.getLeft();
-	}
+	private static ItemBordersConfig INSTANCE;
+	public static ItemBordersConfig getInstance() { return INSTANCE; }
 
 	public final BooleanValue hotBar;
 	public final BooleanValue showForCommon;
@@ -43,14 +36,16 @@ public class ItemBordersConfig
 	public final BooleanValue overItems;
 	public final BooleanValue extraGlow;
 	public final BooleanValue automaticBorders;
-	private final ConfigValue<Config> manualBorders;
+	private final ConfigValue<UnmodifiableConfig> manualBorders;
 
 	private record ItemKey(Item item, CompoundTag tag) {}
 
 	private Map<ItemKey, TextColor> cachedCustomBorders = new HashMap<ItemKey, TextColor>();
 	private boolean emptyCache = true;
 
-	public ItemBordersConfig(ForgeConfigSpec.Builder build)
+	private static final UnmodifiableConfig emptySubconfig = new ForgeConfigSpec.Builder().build();
+
+	public ItemBordersConfig(IcebergConfigSpec.Builder build)
 	{
 		build.comment("Client Configuration").push("client").push("options");
 
@@ -61,14 +56,33 @@ public class ItemBordersConfig
 		overItems = build.comment(" If the borders draw over items instead of under.").define("over_items", false);
 		extraGlow = build.comment(" If the borders should have a more prominent glow.").define("extra_glow", false);
 		automaticBorders = build.comment(" If automatic borders (based on item rarity) should be enabled.").define("auto_borders", true);
-		manualBorders = build.comment(" Custom border colors for specific items. Format: { <color> = [\"list of selectors\"] }. Selectors supported:\n" +
-									  "    Item name - Use item name for vanilla items or include mod name for modded items.  Examples: minecraft:stick, iron_ore\n" +
-									  "    Tag - $ followed by tag name.  Examples: $forge:stone or $planks\n" +
-									  "    Mod name - @ followed by mod identifier.  Examples: @spoiledeggs\n" +
-									  "    Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: !uncommon, !rare, !epic\n" +
-									  "    Item name color - # followed by color hex code, the hex code must match exactly.  Examples: #23F632\n" +
-									  "    Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: %[Uncommon]\n" +
-									  "    Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: ^Rarity: Legendary").define("manual_borders", Config.of(TomlFormat.instance()), (v) -> true);
+
+		// Build the comment for manual borders.
+		StringBuilder selectorsComment = new StringBuilder(" Custom border colors for specific items. Format: { <color> = [\"list of selectors\"] }. Selectors supported:\n");
+		for (SelectorDocumentation doc : Selectors.selectorDocumentation())
+		{
+			selectorsComment.append("    ").append(doc.name()).append(" - ").append(doc.description());
+
+			if (!doc.examples().isEmpty())
+			{
+				selectorsComment.append("  Examples: ");
+				for (int i = 0; i < doc.examples().size(); i++)
+				{
+					if (i > 0)
+					{
+						selectorsComment.append(", ");
+					}
+					selectorsComment.append("\"").append(doc.examples().get(i)).append("\"");
+				}
+			}
+			selectorsComment.append("\n");
+		}
+
+		// Remove the final newline.
+		selectorsComment.setLength(selectorsComment.length() - 1);
+
+		manualBorders = build.comment(selectorsComment.toString()).defineSubconfig("manual_borders", emptySubconfig, k -> validateColor(k), v -> Selectors.validateSelector((String)v));
+
 		build.pop().pop();
 	}
 
@@ -80,6 +94,42 @@ public class ItemBordersConfig
 			// Clear the frame level cache in case anything has changed.
 			INSTANCE.emptyCache = true;
 		}
+	}
+
+	public static TextColor getColor(Object value)
+	{
+		TextColor color = null;
+		if (value instanceof String string)
+		{
+			// Parse string color.
+			String colorString = string.toLowerCase().replace("0x", "").replace("#", "");
+			color = TextColor.parseColor(colorString);
+			if (color == null)
+			{
+				if (colorString.length() == 6 || colorString.length() == 8)
+				{
+					color = TextColor.parseColor("#" + colorString);
+				}
+			}
+		}
+		else if (value instanceof Number number)
+		{
+			color = TextColor.fromRgb(number.intValue());
+		}
+
+		// If alpha is 0 but the color isn't 0x00000000, assume alpha is intended to be 0xFF.
+		// Only downside is if users want black borders they'd have to specify "0xFF000000".
+		if (color != null && color.getValue() > 0 && color.getValue() <= 0xFFFFFF)
+		{
+			color = TextColor.fromRgb(color.getValue() | (0xFF << 24));
+		}
+		
+		return color;
+	}
+
+	private static boolean validateColor(Object value)
+	{
+		return getColor(value) != null;
 	}
 
 	public TextColor getBorderColorForItem(ItemStack item)
@@ -101,23 +151,11 @@ public class ItemBordersConfig
 		Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
 		for (String key : manualBorderMap.keySet())
 		{
-			TextColor color = TextColor.parseColor(key);
+			TextColor color = getColor(key);
 			if (color == null)
 			{
-				if (key.replace("0x", "").length() == 6)
-				{
-					color = TextColor.parseColor("#" + key.replace("0x", ""));
-				}
-				else if (key.replace("0x", "").length() == 8)
-				{
-					color = TextColor.parseColor("#" + key.toLowerCase().replace("0xff", ""));
-				}
-
-				if (color == null)
-				{
-					// This item has an invalid color value, so skip it.
-					continue;
-				}
+				// This item has an invalid color value, so skip it.
+				continue;
 			}
 
 			Object value = manualBorderMap.get(key);
@@ -157,5 +195,11 @@ public class ItemBordersConfig
 
 		cachedCustomBorders.put(itemKey, color);
 		return color;
+	}
+
+	@Override
+	protected <I extends IcebergConfig<?>> void setInstance(I instance)
+	{
+		INSTANCE = (ItemBordersConfig) instance;
 	}
 }

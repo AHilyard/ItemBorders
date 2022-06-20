@@ -24,7 +24,7 @@ public class ItemBorders
 	public static void renderBorder(PoseStack poseStack, ItemStack item, int x, int y)
 	{
 		// If borders are enabled for the hotbar...
-		if (ItemBordersConfig.INSTANCE.hotBar.get())
+		if (ItemBordersConfig.getInstance().hotBar.get())
 		{
 			render(new PoseStack(), item, x, y);
 		}
@@ -37,7 +37,7 @@ public class ItemBorders
 			return;
 		}
 
-		TextColor color = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
+		TextColor color = ItemBordersConfig.getInstance().getBorderColorForItem(item);
 
 		// If the color is null, default to white.
 		if (color == null)
@@ -45,7 +45,7 @@ public class ItemBorders
 			color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
 		}
 
-		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon.get())
+		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.getInstance().showForCommon.get())
 		{
 			return;
 		}
@@ -53,16 +53,16 @@ public class ItemBorders
 		RenderSystem.disableDepthTest();
 
 		poseStack.pushPose();
-		poseStack.translate(0, 0, ItemBordersConfig.INSTANCE.overItems.get() ? 290 : 100);
+		poseStack.translate(0, 0, ItemBordersConfig.getInstance().overItems.get() ? 290 : 100);
 		Matrix4f matrix = poseStack.last().pose();
 
 		int startColor = color.getValue() | 0xEE000000;
 		int endColor = color.getValue() & 0x00FFFFFF;
 
-		int topColor = ItemBordersConfig.INSTANCE.fullBorder.get() ? startColor : endColor;
+		int topColor = ItemBordersConfig.getInstance().fullBorder.get() ? startColor : endColor;
 		int bottomColor = startColor;
 
-		int xOffset = ItemBordersConfig.INSTANCE.squareCorners.get() ? 0 : 1;
+		int xOffset = ItemBordersConfig.getInstance().squareCorners.get() ? 0 : 1;
 
 		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
@@ -71,7 +71,7 @@ public class ItemBorders
 		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
 		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
 
-		if (ItemBordersConfig.INSTANCE.extraGlow.get())
+		if (ItemBordersConfig.getInstance().extraGlow.get())
 		{
 			int topAlpha = ((topColor >> 24) & 0xFF) / 3;
 			int bottomAlpha = ((bottomColor >> 24) & 0xFF) / 3;
