@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[39,)"
+loaderVersion="[41,)"
 license="CC BY-NC-ND 4.0"
 
 [[mods]]
@@ -7,7 +7,7 @@ modId="itemborders"
 version="${file.jarVersion}"
 displayName="Item Borders"
 displayURL="https://anthonyhilyard.com/"
-updateJSONURL="https://mc-curse-update-checker.herokuapp.com/513769"
+updateJSONURL="https://mc-update-check.anthonyhilyard.com/513769"
 logoFile="icon.png"
 authors="Grend"
 description="Adds colored borders around items to indicate rarity."
@@ -15,20 +15,20 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="forge"
 	mandatory=true
-	versionRange="[39,)"
+	versionRange="[41,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.18.1,1.19)"
+	versionRange="[1.19,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.30,)"
+	versionRange="[1.0.44,)"
 	ordering="NONE"
 	side="BOTH"
