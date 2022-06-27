@@ -14,12 +14,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 
+import net.minecraftforge.api.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
+
 public class ItemBorders implements ClientModInitializer
 {
 	@Override
 	public void onInitializeClient()
 	{
-		ItemBordersConfig.init();
+		ModLoadingContext.registerConfig(Loader.MODID, ModConfig.Type.COMMON, ItemBordersConfig.SPEC);
 	}
 
 	public static void renderBorder(PoseStack poseStack, Slot slot)
@@ -31,7 +34,7 @@ public class ItemBorders implements ClientModInitializer
 	public static void renderBorder(PoseStack poseStack, ItemStack item, int x, int y)
 	{
 		// If borders are enabled for the hotbar...
-		if (ItemBordersConfig.INSTANCE.hotBar)
+		if (ItemBordersConfig.INSTANCE.hotBar.get())
 		{
 			render(new PoseStack(), item, x, y);
 		}
@@ -52,7 +55,7 @@ public class ItemBorders implements ClientModInitializer
 			color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
 		}
 
-		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon)
+		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon.get())
 		{
 			return;
 		}
@@ -60,16 +63,16 @@ public class ItemBorders implements ClientModInitializer
 		RenderSystem.disableDepthTest();
 
 		poseStack.pushPose();
-		poseStack.translate(0, 0, ItemBordersConfig.INSTANCE.overItems ? 290 : 100);
+		poseStack.translate(0, 0, ItemBordersConfig.INSTANCE.overItems.get() ? 290 : 100);
 		Matrix4f matrix = poseStack.last().pose();
 
 		int startColor = color.getValue() | 0xEE000000;
 		int endColor = color.getValue() & 0x00FFFFFF;
 
-		int topColor = ItemBordersConfig.INSTANCE.fullBorder ? startColor : endColor;
+		int topColor = ItemBordersConfig.INSTANCE.fullBorder.get() ? startColor : endColor;
 		int bottomColor = startColor;
 
-		int xOffset = ItemBordersConfig.INSTANCE.squareCorners ? 0 : 1;
+		int xOffset = ItemBordersConfig.INSTANCE.squareCorners.get() ? 0 : 1;
 
 		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		GuiHelper.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
@@ -78,7 +81,7 @@ public class ItemBorders implements ClientModInitializer
 		GuiHelper.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
 		GuiHelper.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
 
-		if (ItemBordersConfig.INSTANCE.extraGlow)
+		if (ItemBordersConfig.INSTANCE.extraGlow.get())
 		{
 			int topAlpha = ((topColor >> 24) & 0xFF) / 3;
 			int bottomAlpha = ((bottomColor >> 24) & 0xFF) / 3;
