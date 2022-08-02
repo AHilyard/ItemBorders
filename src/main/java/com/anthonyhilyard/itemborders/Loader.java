@@ -22,7 +22,7 @@ public class Loader
 		{
 			if (!ItemBordersConfig.register(ItemBordersConfig.class, MODID))
 			{
-				LOGGER.error("Failed to register configuration for Merchant Markers!");
+				LOGGER.error("Failed to register configuration for Item Borders!");
 			}
 			new ItemBorders();
 			MinecraftForge.EVENT_BUS.register(ItemBorders.class);

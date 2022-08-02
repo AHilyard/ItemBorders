@@ -51,7 +51,9 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 	
-	implementation fg.deobf('curse.maven:iceberg-520110:3832980')
+	implementation fg.deobf("curse.maven:iceberg-520110:3898603")
+	implementation fg.deobf("curse.maven:prism-638111:3910027")
+	implementation fg.deobf("curse.maven:legendarytooltips-532127:3910283")
 }
 
 jar {

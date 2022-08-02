@@ -1,6 +1,9 @@
 package com.anthonyhilyard.itemborders;
 
-import net.minecraftforge.client.gui.GuiUtils;
+import java.util.function.Supplier;
+
+import com.anthonyhilyard.iceberg.util.GuiHelper;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
@@ -11,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 
 public class ItemBorders
@@ -37,15 +41,18 @@ public class ItemBorders
 			return;
 		}
 
-		TextColor color = ItemBordersConfig.getInstance().getBorderColorForItem(item);
+		Pair<Supplier<Integer>, Supplier<Integer>> borderColors = ItemBordersConfig.getInstance().getBorderColorForItem(item);
 
 		// If the color is null, default to white.
-		if (color == null)
+		if (borderColors == null)
 		{
-			color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
+			borderColors = new Pair<Supplier<Integer>, Supplier<Integer>>(() -> TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue(),
+																		  () -> TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue());
 		}
 
-		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.getInstance().showForCommon.get())
+		if ((borderColors.getFirst().get() & 0x00FFFFFF) == ChatFormatting.WHITE.getColor() &&
+			(borderColors.getSecond().get() & 0x00FFFFFF) == ChatFormatting.WHITE.getColor() &&
+			!ItemBordersConfig.getInstance().showForCommon.get())
 		{
 			return;
 		}
@@ -56,20 +63,20 @@ public class ItemBorders
 		poseStack.translate(0, 0, ItemBordersConfig.getInstance().overItems.get() ? 290 : 100);
 		Matrix4f matrix = poseStack.last().pose();
 
-		int startColor = color.getValue() | 0xEE000000;
-		int endColor = color.getValue() & 0x00FFFFFF;
+		int startColor = borderColors.getFirst().get() & 0x00FFFFFF;
+		int endColor = borderColors.getSecond().get() & 0x00FFFFFF;
 
-		int topColor = ItemBordersConfig.getInstance().fullBorder.get() ? startColor : endColor;
-		int bottomColor = startColor;
+		int topColor = ItemBordersConfig.getInstance().fullBorder.get() ? startColor | 0xEE000000 : startColor;
+		int bottomColor = endColor | 0xEE000000;
 
 		int xOffset = ItemBordersConfig.getInstance().squareCorners.get() ? 0 : 1;
 
 		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		GuiUtils.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
-		GuiUtils.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
+		GuiHelper.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
+		GuiHelper.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
 
-		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
-		GuiUtils.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
+		GuiHelper.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
+		GuiHelper.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
 
 		if (ItemBordersConfig.getInstance().extraGlow.get())
 		{
@@ -79,11 +86,11 @@ public class ItemBorders
 			int topGlowColor = (topAlpha << 24) | (topColor & 0x00FFFFFF);
 			int bottomGlowColor = (bottomAlpha << 24) | (bottomColor & 0x00FFFFFF);
 
-			GuiUtils.drawGradientRect(matrix, -1, x + 1,      y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
-			GuiUtils.drawGradientRect(matrix, -1, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
+			GuiHelper.drawGradientRect(matrix, -1, x + 1,      y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
+			GuiHelper.drawGradientRect(matrix, -1, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
 
-			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 1, x + 15, y + 2, topGlowColor, topGlowColor);
-			GuiUtils.drawGradientRect(matrix, -1, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
+			GuiHelper.drawGradientRect(matrix, -1, x + 1,  y + 1, x + 15, y + 2, topGlowColor, topGlowColor);
+			GuiHelper.drawGradientRect(matrix, -1, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
 		}
 
 		bufferSource.endBatch();

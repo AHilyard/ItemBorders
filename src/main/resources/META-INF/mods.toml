@@ -29,6 +29,13 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.44,)"
+	versionRange="[1.0.46,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.itemborders]]
+	modId="prism"
+	mandatory=true
+	versionRange="[1.0.1,)"
 	ordering="NONE"
 	side="BOTH"
