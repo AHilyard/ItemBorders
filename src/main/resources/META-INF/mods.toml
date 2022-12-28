@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[41,)"
+loaderVersion="[44,)"
 license="CC BY-NC-ND 4.0"
 
 [[mods]]
@@ -15,21 +15,21 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="forge"
 	mandatory=true
-	versionRange="[41,)"
+	versionRange="[44,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.19,)"
+	versionRange="[1.19.3,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.46,)"
+	versionRange="[1.1.2,)"
 	ordering="NONE"
 	side="BOTH"
 

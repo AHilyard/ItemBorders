@@ -2,6 +2,8 @@ package com.anthonyhilyard.itemborders;
 
 import java.util.function.Supplier;
 
+import org.joml.Matrix4f;
+
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 
 import net.minecraft.ChatFormatting;
@@ -15,7 +17,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
+
 
 public class ItemBorders
 {
@@ -34,6 +36,7 @@ public class ItemBorders
 		}
 	}
 
+	@SuppressWarnings("null")
 	private static void render(PoseStack poseStack, ItemStack item, int x, int y)
 	{
 		if (item.isEmpty())
