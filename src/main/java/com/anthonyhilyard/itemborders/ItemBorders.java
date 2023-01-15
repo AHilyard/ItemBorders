@@ -8,21 +8,26 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.function.Supplier;
+
+import org.joml.Matrix4f;
+
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
+import com.mojang.datafixers.util.Pair;
 
-import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
+
+import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 
 public class ItemBorders implements ClientModInitializer
 {
 	@Override
 	public void onInitializeClient()
 	{
-		ModLoadingContext.registerConfig(Loader.MODID, ModConfig.Type.COMMON, ItemBordersConfig.SPEC);
+		ForgeConfigRegistry.INSTANCE.register(Loader.MODID, ModConfig.Type.COMMON, ItemBordersConfig.SPEC);
 	}
 
 	public static void renderBorder(PoseStack poseStack, Slot slot)
@@ -47,15 +52,18 @@ public class ItemBorders implements ClientModInitializer
 			return;
 		}
 
-		TextColor color = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
+		Pair<Supplier<Integer>, Supplier<Integer>> borderColors = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
 
 		// If the color is null, default to white.
-		if (color == null)
+		if (borderColors == null)
 		{
-			color = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
+			borderColors = new Pair<Supplier<Integer>, Supplier<Integer>>(() -> TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue(),
+																		  () -> TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue());
 		}
 
-		if (color.getValue() == ChatFormatting.WHITE.getColor() && !ItemBordersConfig.INSTANCE.showForCommon.get())
+		if ((borderColors.getFirst().get() & 0x00FFFFFF)  == ChatFormatting.WHITE.getColor() &&
+			(borderColors.getSecond().get() & 0x00FFFFFF) == ChatFormatting.WHITE.getColor() &&
+			!ItemBordersConfig.INSTANCE.showForCommon.get())
 		{
 			return;
 		}
@@ -66,11 +74,11 @@ public class ItemBorders implements ClientModInitializer
 		poseStack.translate(0, 0, ItemBordersConfig.INSTANCE.overItems.get() ? 290 : 100);
 		Matrix4f matrix = poseStack.last().pose();
 
-		int startColor = color.getValue() | 0xEE000000;
-		int endColor = color.getValue() & 0x00FFFFFF;
+		int startColor = borderColors.getFirst().get() & 0x00FFFFFF;
+		int endColor = borderColors.getSecond().get() & 0x00FFFFFF;
 
-		int topColor = ItemBordersConfig.INSTANCE.fullBorder.get() ? startColor : endColor;
-		int bottomColor = startColor;
+		int topColor = ItemBordersConfig.INSTANCE.fullBorder.get() ? startColor | 0xEE000000 : startColor;
+		int bottomColor = endColor | 0xEE000000;
 
 		int xOffset = ItemBordersConfig.INSTANCE.squareCorners.get() ? 0 : 1;
 

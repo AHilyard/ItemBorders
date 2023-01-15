@@ -30,10 +30,14 @@
 	"depends": {
 		"fabricloader": ">=0.12.8",
 		"fabric": "*",
-		"minecraft": "~1.19",
+		"minecraft": "~1.19.3",
 		"java": ">=17",
-		"forgeconfigapiport": ">=4.0",
-		"iceberg": ">=1.0.38"
+		"forgeconfigapiport": ">=5.0",
+		"iceberg": ">=1.1.0",
+		"prism": ">=1.0.1"
+	},
+	"suggests": {
+		"legendarytooltips": ">=1.4.0"
 	},
 	"custom": {
 		"modupdater": {

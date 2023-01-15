@@ -14,7 +14,7 @@ sourceSets.main.resources.srcDirs += 'resources'
 repositories {
 	maven {
 		name = "CurseMaven"
-		url "https://www.cursemaven.com"
+		url = "https://www.cursemaven.com"
 	}
 	maven {
 		name = "Fuzs Mod Resources"
@@ -28,8 +28,10 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
 	
-	modImplementation "net.minecraftforge:forgeconfigapiport-fabric:${forgeConfigApiVersion}"
-	modImplementation "curse.maven:iceberg-539382:3832794"
+	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeConfigApiVersion}"
+	modImplementation "curse.maven:iceberg-539382:4334097"
+	modImplementation "curse.maven:prism-665526:4334099"
+	modImplementation "curse.maven:legendarytooltips-542478:4335100"
 }
 
 processResources {
