@@ -20,7 +20,7 @@ public class AbstractContainerScreenMixin extends Screen
 	protected AbstractContainerScreenMixin(Component titleIn) { super(titleIn); }
 
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;renderAndDecorateItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;III)V", shift = Shift.AFTER))
+			target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;renderAndDecorateItem(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;III)V", shift = Shift.AFTER))
 	public void renderSlot(PoseStack poseStack, Slot slot, CallbackInfo info)
 	{
 		ItemBorders.renderBorder(poseStack, slot);
