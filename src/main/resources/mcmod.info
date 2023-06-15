@@ -1,0 +1,14 @@
+[
+	{
+		"name": "Item Borders",
+		"modid": "itemborders",
+		"description": "Adds colored borders around items to indicate rarity.",
+		"version": "${version}",
+		"mcversion": "${mcVersion}",
+		"url": "https://anthonyhilyard.com/",
+		"updateUrl": "https://mc-update-check.anthonyhilyard.com/513769",
+		"authorList": ["Grend"],
+		"logoFile": "icon.png",
+		"dependencies": []
+	}
+]
