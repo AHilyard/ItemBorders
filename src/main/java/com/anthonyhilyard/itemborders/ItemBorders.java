@@ -41,7 +41,7 @@ public class ItemBorders implements ClientModInitializer
 		// If borders are enabled for the hotbar...
 		if (ItemBordersConfig.INSTANCE.hotBar.get())
 		{
-			render(new PoseStack(), item, x, y);
+			render(poseStack, item, x, y);
 		}
 	}
 
