@@ -47,10 +47,6 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
 }
 
-java {
-	withSourcesJar()
-}
-
 jar {
 	manifest {
 		attributes(["Specification-Title":		project.name,
