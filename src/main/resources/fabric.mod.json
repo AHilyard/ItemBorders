@@ -28,13 +28,13 @@
 	],
 
 	"depends": {
-		"fabricloader": ">=0.14.21",
+		"fabricloader": ">=0.15.0",
 		"fabric": "*",
-		"minecraft": "~1.20",
+		"minecraft": ">=1.20.2",
 		"java": ">=17",
-		"forgeconfigapiport": ">=7.0",
-		"iceberg": ">=1.1.0",
-		"prism": ">=1.0.1"
+		"forgeconfigapiport": ">=9.1",
+		"iceberg": ">=1.1.16",
+		"prism": ">=1.0.5"
 	},
 	"suggests": {
 		"legendarytooltips": ">=1.4.0"
