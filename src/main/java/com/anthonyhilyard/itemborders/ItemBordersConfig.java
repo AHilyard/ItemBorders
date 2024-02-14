@@ -179,6 +179,8 @@ public class ItemBordersConfig
 		{
 			return cachedCustomBorders.get(itemKey);
 		}
+
+		// Check the manual border map first.
 		Map<String, Object> manualBorderMap = manualBorders.get().valueMap();
 		for (String key : manualBorderMap.keySet())
 		{
@@ -216,6 +218,44 @@ public class ItemBordersConfig
 		}
 
 		Pair<Supplier<Integer>, Supplier<Integer>> colors = null;
+
+		// No manually-configured color was found, so check for an NBT tag.
+		if (item.hasTag())
+		{
+			CompoundTag tag = item.getTag();
+			if (tag.contains("itemborders_colors"))
+			{
+				CompoundTag colorsTag = tag.getCompound("itemborders_colors");
+				TextColor topColor = null;
+				TextColor bottomColor = null;
+				if (colorsTag.contains("top"))
+				{
+					topColor = getColor(colorsTag.get("top").getAsString());
+				}
+				if (colorsTag.contains("bottom"))
+				{
+					bottomColor = getColor(colorsTag.get("bottom").getAsString());
+				}
+
+				if (topColor == null)
+				{
+					topColor = bottomColor;
+				}
+				if (bottomColor == null)
+				{
+					bottomColor = topColor;
+				}
+
+				if (topColor != null && bottomColor != null)
+				{
+					final TextColor finalTopColor = topColor;
+					final TextColor finalBottomColor = bottomColor;
+					colors = new Pair<Supplier<Integer>,Supplier<Integer>>(() -> finalTopColor.getValue(), () -> finalBottomColor.getValue());
+					cachedCustomBorders.put(itemKey, colors);
+					return colors;
+				}
+			}
+		}
 
 		// Assign an automatic color based on rarity and custom name colors.
 		if (ItemBordersConfig.INSTANCE.automaticBorders.get())
