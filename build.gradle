@@ -1,10 +1,10 @@
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
 archivesBaseName = project.name + '-' + project.mcVersion + '-fabric'
 
@@ -29,9 +29,9 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
 	
 	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeConfigApiVersion}"
-	modImplementation "curse.maven:iceberg-539382:4334097"
-	modImplementation "curse.maven:prism-665526:4334099"
-	modImplementation "curse.maven:legendarytooltips-542478:4335100"
+	modImplementation files("libs/Iceberg-1.20.5-fabric-1.1.19.jar")
+	modImplementation files("libs/Prism-1.20.5-fabric-1.0.7.jar")
+	modImplementation files("libs/LegendaryTooltips-1.20.5-fabric-1.4.6.jar")
 }
 
 processResources {
@@ -44,7 +44,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
-	it.options.release = 17
+	it.options.release = 21
 }
 
 jar {

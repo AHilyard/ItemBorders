@@ -15,8 +15,12 @@ import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import com.mojang.datafixers.util.Pair;
 
-import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
+import fuzs.forgeconfigapiport.fabric.api.forge.v4.ForgeModConfigEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.item.Item;
@@ -48,14 +52,14 @@ public class ItemBordersConfig
 	public final BooleanValue legendaryTooltipsSync;
 	private final ConfigValue<UnmodifiableConfig> manualBorders;
 
-	private record ItemKey(Item item, CompoundTag tag) {}
+	private record ItemKey(Item item, DataComponentMap components) {}
 
 	private Map<ItemKey, Pair<Supplier<Integer>, Supplier<Integer>>> cachedCustomBorders = new HashMap<ItemKey, Pair<Supplier<Integer>, Supplier<Integer>>>();
 	private boolean emptyCache = true;
 
 	public ItemBordersConfig(ForgeConfigSpec.Builder build)
 	{
-		ModConfigEvents.reloading(Loader.MODID).register(ItemBordersConfig::onReload);
+		ForgeModConfigEvents.reloading(Loader.MODID).register(ItemBordersConfig::onReload);
 
 		build.comment(" If you would like to specify manual borders, add a new manual_borders section at the bottom of the file.\n" +
 					  " The format for each color of border is 'color = [\"modid:item1\", \"modid:item2\"]\"]'." +
@@ -165,9 +169,9 @@ public class ItemBordersConfig
 	}
 
 	@SuppressWarnings("unchecked")
-	public Pair<Supplier<Integer>, Supplier<Integer>> getBorderColorForItem(ItemStack item)
+	public Pair<Supplier<Integer>, Supplier<Integer>> getBorderColorForItem(ItemStack item, HolderLookup.Provider provider)
 	{
-		ItemKey itemKey = new ItemKey(item.getItem(), item.getTag());
+		ItemKey itemKey = new ItemKey(item.getItem(), new PatchedDataComponentMap(item.getComponents()));
 
 		// Clear the cache first if we have to.
 		if (emptyCache)
@@ -194,7 +198,7 @@ public class ItemBordersConfig
 			Object value = manualBorderMap.get(key);
 			if (value instanceof String)
 			{
-				if (Selectors.itemMatches(item, (String)value))
+				if (Selectors.itemMatches(item, (String)value, provider))
 				{
 					cachedCustomBorders.put(itemKey, colors);
 					return colors;
@@ -207,7 +211,7 @@ public class ItemBordersConfig
 				{
 					if (stringVal instanceof String)
 					{
-						if (Selectors.itemMatches(item, (String)stringVal))
+						if (Selectors.itemMatches(item, (String)stringVal, provider))
 						{
 							cachedCustomBorders.put(itemKey, colors);
 							return colors;
@@ -220,9 +224,9 @@ public class ItemBordersConfig
 		Pair<Supplier<Integer>, Supplier<Integer>> colors = null;
 
 		// No manually-configured color was found, so check for an NBT tag.
-		if (item.hasTag())
+		if (item.has(DataComponents.CUSTOM_DATA))
 		{
-			CompoundTag tag = item.getTag();
+			CompoundTag tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 			if (tag.contains("itemborders_colors"))
 			{
 				CompoundTag colorsTag = tag.getCompound("itemborders_colors");

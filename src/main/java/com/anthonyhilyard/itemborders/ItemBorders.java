@@ -2,8 +2,7 @@ package com.anthonyhilyard.itemborders;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -15,12 +14,11 @@ import org.joml.Matrix4f;
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraftforge.fml.config.ModConfig;
 
-import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.forge.v4.ForgeConfigRegistry;
 
 public class ItemBorders implements ClientModInitializer
 {
@@ -52,7 +50,13 @@ public class ItemBorders implements ClientModInitializer
 			return;
 		}
 
-		Pair<Supplier<Integer>, Supplier<Integer>> borderColors = ItemBordersConfig.INSTANCE.getBorderColorForItem(item);
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.level == null)
+		{
+			return;
+		}
+
+		Pair<Supplier<Integer>, Supplier<Integer>> borderColors = ItemBordersConfig.INSTANCE.getBorderColorForItem(item, minecraft.level.registryAccess());
 
 		// If the color is null, default to white.
 		if (borderColors == null)
@@ -82,7 +86,7 @@ public class ItemBorders implements ClientModInitializer
 
 		int xOffset = ItemBordersConfig.INSTANCE.squareCorners.get() ? 0 : 1;
 
-		BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+		//BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		GuiHelper.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
 		GuiHelper.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
 
@@ -104,7 +108,7 @@ public class ItemBorders implements ClientModInitializer
 			GuiHelper.drawGradientRect(matrix, -1, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
 		}
 
-		bufferSource.endBatch();
+		//bufferSource.endBatch();
 		poseStack.popPose();
 	}
 }

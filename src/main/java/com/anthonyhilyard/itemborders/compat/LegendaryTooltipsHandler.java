@@ -9,13 +9,20 @@ import com.anthonyhilyard.prism.text.DynamicColor;
 import com.anthonyhilyard.prism.util.ConfigHelper;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 
 public class LegendaryTooltipsHandler
 {
 	public static Pair<Supplier<Integer>, Supplier<Integer>> getBorderColors(ItemStack item)
 	{
-		FrameDefinition frameDefinition = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item);
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.level == null)
+		{
+			return null;
+		}
+
+		FrameDefinition frameDefinition = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item, minecraft.level.registryAccess());
 		if (frameDefinition.index() < 0)
 		{
 			return null;
