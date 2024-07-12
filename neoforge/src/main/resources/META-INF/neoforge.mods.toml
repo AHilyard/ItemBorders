@@ -1,0 +1,48 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="CC BY-NC-ND 4.0"
+
+[[mods]]
+modId="itemborders"
+version="${version}"
+displayName="Item Borders"
+displayURL="https://anthonyhilyard.com/"
+updateJSONURL="https://mc-update-check.anthonyhilyard.com/513769"
+logoFile="icon.png"
+authors="Grend"
+description="Adds colored borders around items to indicate rarity."
+
+[[dependencies.itemborders]]
+	modId="forge"
+	type="required"
+	versionRange="[21,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.itemborders]]
+	modId="minecraft"
+	type="required"
+	versionRange="[1.21.0,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.itemborders]]
+	modId="iceberg"
+	type="required"
+	versionRange="[1.2.0,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.itemborders]]
+	modId="prism"
+	type="required"
+	versionRange="[1.0.7,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.itemborders]]
+	modId="legendarytooltips"
+	type="optional"
+	versionRange="[1.4.7,)"
+	ordering="NONE"
+	side="BOTH"
