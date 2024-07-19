@@ -13,7 +13,7 @@ authors="Grend"
 description="Adds colored borders around items to indicate rarity."
 
 [[dependencies.itemborders]]
-	modId="forge"
+	modId="neoforge"
 	type="required"
 	versionRange="[21,)"
 	ordering="NONE"
@@ -30,7 +30,7 @@ description="Adds colored borders around items to indicate rarity."
 	modId="iceberg"
 	type="required"
 	versionRange="[1.2.0,)"
-	ordering="NONE"
+	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.itemborders]]
@@ -46,3 +46,6 @@ description="Adds colored borders around items to indicate rarity."
 	versionRange="[1.4.7,)"
 	ordering="NONE"
 	side="BOTH"
+
+[[mixins]]
+	config="itemborders.mixins.json"

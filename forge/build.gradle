@@ -4,6 +4,7 @@ plugins {
 
 loom {
 	forge {
+		mixinConfig "itemborders.mixins.json"
 	}
 }
 
