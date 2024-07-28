@@ -37,7 +37,7 @@ description="Adds colored borders around items to indicate rarity."
 	modId="prism"
 	mandatory=true
 	versionRange="[1.0.7,)"
-	ordering="NONE"
+	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.itemborders]]

@@ -1,10 +1,11 @@
 plugins {
-	id 'com.github.johnrengelman.shadow'
+	id 'io.github.goooler.shadow'
 }
 
 loom {
 	forge {
 		mixinConfig "itemborders.mixins.json"
+		mixinConfig "itemborders.forge.mixins.json"
 	}
 }
 
@@ -47,12 +48,8 @@ processResources {
 
 shadowJar {
 	configurations = [project.configurations.shadowBundle]
-	archiveClassifier = ""
-	destinationDirectory = file("$buildDir/../../output")
 }
 
 remapJar {
-	enabled = false
 	input.set shadowJar.archiveFile
 }
-

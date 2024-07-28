@@ -24,7 +24,8 @@
 	 },
 
 	"mixins": [
-		"itemborders.mixins.json"
+		"itemborders.mixins.json",
+		"itemborders.fabric.mixins.json"
 	],
 
 	"depends": {

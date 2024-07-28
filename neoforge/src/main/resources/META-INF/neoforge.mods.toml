@@ -49,3 +49,6 @@ description="Adds colored borders around items to indicate rarity."
 
 [[mixins]]
 	config="itemborders.mixins.json"
+
+[[mixins]]
+	config="itemborders.neoforge.mixins.json"
