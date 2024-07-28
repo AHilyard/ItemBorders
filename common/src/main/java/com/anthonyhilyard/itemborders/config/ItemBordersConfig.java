@@ -250,7 +250,7 @@ public class ItemBordersConfig extends IcebergConfig<ItemBordersConfig>
 			colors = new Pair<Supplier<Integer>,Supplier<Integer>>(() -> color.getValue(), () -> color.getValue());
 		}
 
-		if (Services.PLATFORM.isModLoaded("legendarytooltips") && ItemBordersConfig.getInstance().legendaryTooltipsSync.get())
+		if (Services.getPlatformHelper().isModLoaded("legendarytooltips") && ItemBordersConfig.getInstance().legendaryTooltipsSync.get())
 		{
 			Pair<Supplier<Integer>, Supplier<Integer>> borderColors = null;
 			try

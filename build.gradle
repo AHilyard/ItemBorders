@@ -73,7 +73,7 @@ subprojects {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraftVersion"
 		mappings loom.officialMojangMappings()
 
-		modImplementation files("../libs/Iceberg-1.21-common-1.2.0.jar")
+		modImplementation files("../libs/Iceberg-1.21-common-1.2.1.jar")
 		modImplementation files("../libs/Prism-1.21-fabric-1.0.7.jar")
 		modImplementation files("../libs/LegendaryTooltips-1.21-common-1.4.7.jar")
 	}
