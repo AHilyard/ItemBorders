@@ -11,9 +11,6 @@ public final class ItemBordersForge
 {
 	public ItemBordersForge()
 	{
-		// Run our common setup.
-		ItemBorders.init();
-
 		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "ANY", (remote, isServer) -> true));
 	}
 }

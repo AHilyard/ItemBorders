@@ -9,7 +9,6 @@ public final class ItemBordersFabric implements ModInitializer
 	@Override
 	public void onInitialize()
 	{
-		// Run our common setup.
 		ItemBorders.init();
 	}
 }
