@@ -29,15 +29,15 @@
 	],
 
 	"depends": {
-		"fabricloader": ">=0.15.10",
+		"fabricloader": ">=0.16.0",
 		"fabric": "*",
-		"minecraft": ">=1.21",
+		"minecraft": ">=1.21.3",
 		"java": ">=21",
-		"iceberg": ">=1.2.1",
-		"prism": ">=1.0.7"
+		"iceberg": ">=1.2.10",
+		"prism": ">=1.0.9"
 	},
 	"suggests": {
-		"legendarytooltips": ">=1.4.7"
+		"legendarytooltips": ">=1.5.0"
 	},
 	"custom": {
 		"modupdater": {
