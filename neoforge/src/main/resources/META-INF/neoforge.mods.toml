@@ -15,14 +15,14 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="neoforge"
 	type="required"
-	versionRange="[21,)"
+	versionRange="[21.1,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="minecraft"
 	type="required"
-	versionRange="[1.21.0,)"
+	versionRange="[1.21.8,)"
 	ordering="NONE"
 	side="BOTH"
 
