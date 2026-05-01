@@ -5,17 +5,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joml.Matrix4f;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.itemborders.config.ItemBordersConfig;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 
 public class ItemBorders
@@ -28,22 +26,20 @@ public class ItemBorders
 		ItemBordersConfig.register(ItemBordersConfig.class, MODID);
 	}
 
-	public static void renderBorder(PoseStack poseStack, Slot slot)
+	public static void renderBorder(GuiGraphics graphics, Slot slot)
 	{
-		// Container GUIs.
-		render(poseStack, slot.getItem(), slot.x, slot.y);
+		render(graphics, slot.getItem(), slot.x, slot.y);
 	}
 
-	public static void renderBorder(PoseStack poseStack, ItemStack item, int x, int y)
+	public static void renderBorder(GuiGraphics graphics, ItemStack item, int x, int y)
 	{
-		// If borders are enabled for the hotbar...
 		if (ItemBordersConfig.getInstance().hotBar.get())
 		{
-			render(poseStack, item, x, y);
+			render(graphics, item, x, y);
 		}
 	}
 
-	private static void render(PoseStack poseStack, ItemStack item, int x, int y)
+	private static void render(GuiGraphics graphics, ItemStack item, int x, int y)
 	{
 		if (item.isEmpty())
 		{
@@ -58,7 +54,6 @@ public class ItemBorders
 
 		Pair<Supplier<Integer>, Supplier<Integer>> borderColors = ItemBordersConfig.getInstance().getBorderColorForItem(item, minecraft.level.registryAccess());
 
-		// If the color is null, default to white.
 		if (borderColors == null)
 		{
 			borderColors = new Pair<Supplier<Integer>, Supplier<Integer>>(() -> TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue(),
@@ -72,12 +67,6 @@ public class ItemBorders
 			return;
 		}
 
-		RenderSystem.disableDepthTest();
-
-		poseStack.pushPose();
-		poseStack.translate(0, 0, ItemBordersConfig.getInstance().overItems.get() ? 290 : 100);
-		Matrix4f matrix = poseStack.last().pose();
-
 		int startColor = borderColors.getFirst().get() & 0x00FFFFFF;
 		int endColor = borderColors.getSecond().get() & 0x00FFFFFF;
 
@@ -86,11 +75,13 @@ public class ItemBorders
 
 		int xOffset = ItemBordersConfig.getInstance().squareCorners.get() ? 0 : 1;
 
-		GuiHelper.drawGradientRect(matrix, -1, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
-		GuiHelper.drawGradientRect(matrix, -1, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
+		// Left and Right
+		GuiHelper.drawGradientRect(graphics, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
+		GuiHelper.drawGradientRect(graphics, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
 
-		GuiHelper.drawGradientRect(matrix, -1, x + xOffset,  y, x + 16 - xOffset, y + 1, topColor, topColor);
-		GuiHelper.drawGradientRect(matrix, -1, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
+		// Top and Bottom
+		GuiHelper.drawGradientRect(graphics, x + xOffset,  y,      x + 16 - xOffset, y + 1,  topColor, topColor);
+		GuiHelper.drawGradientRect(graphics, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
 
 		if (ItemBordersConfig.getInstance().extraGlow.get())
 		{
@@ -100,13 +91,13 @@ public class ItemBorders
 			int topGlowColor = (topAlpha << 24) | (topColor & 0x00FFFFFF);
 			int bottomGlowColor = (bottomAlpha << 24) | (bottomColor & 0x00FFFFFF);
 
-			GuiHelper.drawGradientRect(matrix, -1, x + 1,      y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
-			GuiHelper.drawGradientRect(matrix, -1, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
+			// Left and Right Glow
+			GuiHelper.drawGradientRect(graphics, x + 1,  y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
+			GuiHelper.drawGradientRect(graphics, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
 
-			GuiHelper.drawGradientRect(matrix, -1, x + 1,  y + 1, x + 15, y + 2, topGlowColor, topGlowColor);
-			GuiHelper.drawGradientRect(matrix, -1, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
+			// Top and Bottom Glow
+			GuiHelper.drawGradientRect(graphics, x + 1,  y + 1,  x + 15, y + 2,  topGlowColor, topGlowColor);
+			GuiHelper.drawGradientRect(graphics, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
 		}
-
-		poseStack.popPose();
 	}
 }
