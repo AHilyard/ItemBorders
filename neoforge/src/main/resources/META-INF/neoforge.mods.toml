@@ -22,21 +22,21 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="minecraft"
 	type="required"
-	versionRange="[1.21.3,)"
+	versionRange="[1.21.11]"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="iceberg"
 	type="required"
-	versionRange="[1.2.10,)"
+	versionRange="[1.4.0,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="prism"
 	type="required"
-	versionRange="[1.0.9,)"
+	versionRange="[1.4.0,)"
 	ordering="NONE"
 	side="BOTH"
 

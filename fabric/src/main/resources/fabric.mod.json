@@ -31,10 +31,10 @@
 	"depends": {
 		"fabricloader": ">=0.16.0",
 		"fabric": "*",
-		"minecraft": ">=1.21.3",
+		"minecraft": "=1.21.11",
 		"java": ">=21",
-		"iceberg": ">=1.2.10",
-		"prism": ">=1.0.9"
+		"iceberg": ">=1.4.0",
+		"prism": ">=1.1.0"
 	},
 	"suggests": {
 		"legendarytooltips": ">=1.5.0"
