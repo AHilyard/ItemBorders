@@ -24,7 +24,8 @@ public class AbstractContainerScreenMixin extends Screen
 	@Inject(method = "renderSlot", at = @At("HEAD"))
 	public void renderSlotBackground(GuiGraphics graphics, Slot slot, int i, int j, CallbackInfo ci)
 	{
-		if (!ItemBordersConfig.getInstance().overItems.get()) {
+		if (!ItemBordersConfig.getInstance().overItems.get())
+		{
 			ItemBorders.renderBorder(graphics, slot);
 			graphics.nextStratum();
 		}
@@ -34,7 +35,8 @@ public class AbstractContainerScreenMixin extends Screen
 	@Inject(method = "renderSlotContents", at = @At(value = "TAIL"), remap = false)
 	public void renderSlotForeground(GuiGraphics graphics, ItemStack itemstack, Slot slot, String countString, CallbackInfo ci)
 	{
-		if (ItemBordersConfig.getInstance().overItems.get()) {
+		if (ItemBordersConfig.getInstance().overItems.get())
+		{
 			graphics.nextStratum();
 			ItemBorders.renderBorder(graphics, slot);
 		}
