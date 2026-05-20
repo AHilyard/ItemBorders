@@ -20,7 +20,7 @@ public class AbstractContainerScreenMixin extends Screen
 {
 	protected AbstractContainerScreenMixin(Component titleIn) { super(titleIn); }
 
-	// Renders under the item
+	// Renders under the item.
 	@Inject(method = "renderSlot", at = @At("HEAD"))
 	public void renderSlotBackground(GuiGraphics graphics, Slot slot, int i, int j, CallbackInfo ci)
 	{
@@ -31,7 +31,7 @@ public class AbstractContainerScreenMixin extends Screen
 		}
 	}
 
-	// Renders over the item
+	// Renders over the item.
 	@Inject(method = "renderSlotContents", at = @At(value = "TAIL"), remap = false)
 	public void renderSlotForeground(GuiGraphics graphics, ItemStack itemstack, Slot slot, String countString, CallbackInfo ci)
 	{

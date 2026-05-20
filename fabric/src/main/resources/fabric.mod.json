@@ -6,6 +6,7 @@
 	"name": "Item Borders",
 	"description": "Adds colored borders around items to indicate rarity.",
 	"authors": [ "Grend" ],
+	"contributors": [ "Mat0u5" ],
 	"contact": {
 		"homepage": "https://anthonyhilyard.com/",
 		"sources": "https://github.com/AHilyard/ItemBorders",

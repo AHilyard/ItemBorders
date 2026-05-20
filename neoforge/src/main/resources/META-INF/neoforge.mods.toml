@@ -9,13 +9,13 @@ displayName="Item Borders"
 displayURL="https://anthonyhilyard.com/"
 updateJSONURL="https://mc-update-check.anthonyhilyard.com/513769"
 logoFile="icon.png"
-authors="Grend"
+authors="Grend, Mat0u5"
 description="Adds colored borders around items to indicate rarity."
 
 [[dependencies.itemborders]]
 	modId="neoforge"
 	type="required"
-	versionRange="[21,)"
+	versionRange="[21.11.42,)"
 	ordering="NONE"
 	side="BOTH"
 

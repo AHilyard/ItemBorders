@@ -75,11 +75,11 @@ public class ItemBorders
 
 		int xOffset = ItemBordersConfig.getInstance().squareCorners.get() ? 0 : 1;
 
-		// Left and Right
+		// Renders left and right borders.
 		GuiHelper.drawGradientRect(graphics, x,      y + 1,  x + 1,  y + 15, topColor, bottomColor);
 		GuiHelper.drawGradientRect(graphics, x + 15, y + 1,  x + 16, y + 15, topColor, bottomColor);
 
-		// Top and Bottom
+		// Renders top and bottom borders.
 		GuiHelper.drawGradientRect(graphics, x + xOffset,  y,      x + 16 - xOffset, y + 1,  topColor, topColor);
 		GuiHelper.drawGradientRect(graphics, x + xOffset,  y + 15, x + 16 - xOffset, y + 16, bottomColor, bottomColor);
 
@@ -91,11 +91,11 @@ public class ItemBorders
 			int topGlowColor = (topAlpha << 24) | (topColor & 0x00FFFFFF);
 			int bottomGlowColor = (bottomAlpha << 24) | (bottomColor & 0x00FFFFFF);
 
-			// Left and Right Glow
+			// Renders left and right glow.
 			GuiHelper.drawGradientRect(graphics, x + 1,  y + 1,  x + 2,  y + 15, topGlowColor, bottomGlowColor);
 			GuiHelper.drawGradientRect(graphics, x + 14, y + 1,  x + 15, y + 15, topGlowColor, bottomGlowColor);
 
-			// Top and Bottom Glow
+			// Renders top and bottom glow.
 			GuiHelper.drawGradientRect(graphics, x + 1,  y + 1,  x + 15, y + 2,  topGlowColor, topGlowColor);
 			GuiHelper.drawGradientRect(graphics, x + 1,  y + 14, x + 15, y + 15, bottomGlowColor, bottomGlowColor);
 		}

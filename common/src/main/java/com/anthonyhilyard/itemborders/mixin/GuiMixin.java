@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 @Mixin(Gui.class)
 public class GuiMixin
 {
-	// Renders under the item
+	// Renders under the item.
 	@Inject(method = "renderSlot", at = @At("HEAD"))
 	public void renderSlotBackground(GuiGraphics graphics, int x, int y, DeltaTracker tracker, Player player, ItemStack item, int seed, CallbackInfo info)
 	{
@@ -28,7 +28,7 @@ public class GuiMixin
 		}
 	}
 
-	// Renders over the item
+	// Renders over the item.
 	@Inject(method = "renderSlot",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V", shift = Shift.AFTER))
 	public void renderSlotForeground(GuiGraphics graphics, int x, int y, DeltaTracker tracker, Player player, ItemStack item, int seed, CallbackInfo info)
