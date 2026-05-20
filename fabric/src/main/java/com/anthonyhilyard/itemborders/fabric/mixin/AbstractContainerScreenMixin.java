@@ -27,6 +27,7 @@ public class AbstractContainerScreenMixin extends Screen
 		if (!ItemBordersConfig.getInstance().overItems.get())
 		{
 			ItemBorders.renderBorder(graphics, slot);
+			graphics.nextStratum();
 		}
 	}
 
