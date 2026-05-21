@@ -2,6 +2,7 @@ package com.anthonyhilyard.itemborders.config;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.anthonyhilyard.iceberg.config.IcebergConfig;
@@ -209,18 +210,19 @@ public class ItemBordersConfig extends IcebergConfig<ItemBordersConfig>
 		if (item.has(DataComponents.CUSTOM_DATA))
 		{
 			CompoundTag tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
-			if (tag.contains("itemborders_colors"))
+			Optional<CompoundTag> optColorsTag = tag.getCompound("itemborders_colors");
+			if (optColorsTag.isPresent())
 			{
-				CompoundTag colorsTag = tag.getCompound("itemborders_colors");
+				CompoundTag colorsTag = optColorsTag.get();
 				TextColor topColor = null;
 				TextColor bottomColor = null;
 				if (colorsTag.contains("top"))
 				{
-					topColor = getColor(colorsTag.get("top").getAsString());
+					topColor = getColor(colorsTag.get("top").asString());
 				}
 				if (colorsTag.contains("bottom"))
 				{
-					bottomColor = getColor(colorsTag.get("bottom").getAsString());
+					bottomColor = getColor(colorsTag.get("bottom").asString());
 				}
 
 				if (topColor == null)

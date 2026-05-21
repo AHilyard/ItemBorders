@@ -1,6 +1,7 @@
 package com.anthonyhilyard.itemborders.fabric.mixin;
 
 import com.anthonyhilyard.itemborders.ItemBorders;
+import com.anthonyhilyard.itemborders.config.ItemBordersConfig;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,10 +20,26 @@ public class AbstractContainerScreenMixin extends Screen
 {
 	protected AbstractContainerScreenMixin(Component titleIn) { super(titleIn); }
 
+	// Renders under the item.
+	@Inject(method = "renderSlot", at = @At("HEAD"))
+	public void renderSlotBackground(GuiGraphics graphics, Slot slot, int i, int j, CallbackInfo ci)
+	{
+		if (!ItemBordersConfig.getInstance().overItems.get())
+		{
+			ItemBorders.renderBorder(graphics, slot);
+			graphics.nextStratum();
+		}
+	}
+
+	// Renders over the item.
 	@Inject(method = "renderSlot", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/gui/GuiGraphics;renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", shift = Shift.AFTER))
-	public void renderSlot(GuiGraphics graphics, Slot slot, CallbackInfo info)
+	public void renderSlotForeground(GuiGraphics graphics, Slot slot, int i, int j, CallbackInfo ci)
 	{
-		ItemBorders.renderBorder(graphics.pose(), slot);
+		if (ItemBordersConfig.getInstance().overItems.get())
+		{
+			graphics.nextStratum();
+			ItemBorders.renderBorder(graphics, slot);
+		}
 	}
 }
