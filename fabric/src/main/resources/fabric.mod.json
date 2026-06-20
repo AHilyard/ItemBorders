@@ -32,13 +32,13 @@
 	"depends": {
 		"fabricloader": ">=0.16.0",
 		"fabric": "*",
-		"minecraft": "=1.21.11",
-		"java": ">=21",
-		"iceberg": ">=1.4.0",
-		"prism": ">=1.1.0"
+		"minecraft": ">=26.1",
+		"java": ">=25",
+		"iceberg": ">=1.4.1",
+		"prism": ">=1.1.1"
 	},
 	"suggests": {
-		"legendarytooltips": ">=1.5.0"
+		"legendarytooltips": ">=1.5.1"
 	},
 	"custom": {
 		"modupdater": {
