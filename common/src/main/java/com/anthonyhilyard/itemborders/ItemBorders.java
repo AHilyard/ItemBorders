@@ -2,10 +2,10 @@ package com.anthonyhilyard.itemborders;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.function.Supplier;
 
@@ -26,12 +26,12 @@ public class ItemBorders
 		ItemBordersConfig.register(ItemBordersConfig.class, MODID);
 	}
 
-	public static void renderBorder(GuiGraphics graphics, Slot slot)
+	public static void renderBorder(GuiGraphicsExtractor graphics, Slot slot)
 	{
 		render(graphics, slot.getItem(), slot.x, slot.y);
 	}
 
-	public static void renderBorder(GuiGraphics graphics, ItemStack item, int x, int y)
+	public static void renderBorder(GuiGraphicsExtractor graphics, ItemStack item, int x, int y)
 	{
 		if (ItemBordersConfig.getInstance().hotBar.get())
 		{
@@ -39,7 +39,7 @@ public class ItemBorders
 		}
 	}
 
-	private static void render(GuiGraphics graphics, ItemStack item, int x, int y)
+	private static void render(GuiGraphicsExtractor graphics, ItemStack item, int x, int y)
 	{
 		if (item.isEmpty())
 		{

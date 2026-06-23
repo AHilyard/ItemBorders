@@ -3,6 +3,7 @@ package com.anthonyhilyard.itemborders.mixin;
 import com.anthonyhilyard.itemborders.ItemBorders;
 import com.anthonyhilyard.itemborders.config.ItemBordersConfig;
 
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,8 +19,8 @@ import net.minecraft.world.item.ItemStack;
 public class GuiMixin
 {
 	// Renders under the item.
-	@Inject(method = "renderSlot", at = @At("HEAD"))
-	public void renderSlotBackground(GuiGraphics graphics, int x, int y, DeltaTracker tracker, Player player, ItemStack item, int seed, CallbackInfo info)
+	@Inject(method = "extractSlot", at = @At("HEAD"))
+	public void renderSlotBackground(GuiGraphicsExtractor graphics, int x, int y, DeltaTracker tracker, Player player, ItemStack item, int seed, CallbackInfo info)
 	{
 		if (!ItemBordersConfig.getInstance().overItems.get())
 		{
@@ -29,9 +29,9 @@ public class GuiMixin
 	}
 
 	// Renders over the item.
-	@Inject(method = "renderSlot",
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V", shift = Shift.AFTER))
-	public void renderSlotForeground(GuiGraphics graphics, int x, int y, DeltaTracker tracker, Player player, ItemStack item, int seed, CallbackInfo info)
+	@Inject(method = "extractSlot",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;itemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V", shift = Shift.AFTER))
+	public void renderSlotForeground(GuiGraphicsExtractor graphics, int x, int y, DeltaTracker tracker, Player player, ItemStack item, int seed, CallbackInfo info)
 	{
 		if (ItemBordersConfig.getInstance().overItems.get())
 		{
