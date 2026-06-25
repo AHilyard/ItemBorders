@@ -60,8 +60,8 @@ public class ItemBorders
 																		  () -> TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue());
 		}
 
-		if ((borderColors.getFirst().get() & 0x00FFFFFF)  == ChatFormatting.WHITE.getColor() &&
-			(borderColors.getSecond().get() & 0x00FFFFFF) == ChatFormatting.WHITE.getColor() &&
+		if ((borderColors.getFirst().get() & 0x00FFFFFF)  == TextColor.WHITE.getValue() &&
+			(borderColors.getSecond().get() & 0x00FFFFFF) == TextColor.WHITE.getValue() &&
 			!ItemBordersConfig.getInstance().showForCommon.get())
 		{
 			return;

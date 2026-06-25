@@ -4,6 +4,7 @@ import com.anthonyhilyard.itemborders.ItemBorders;
 import com.anthonyhilyard.itemborders.config.ItemBordersConfig;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,12 +12,11 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-@Mixin(Gui.class)
-public class GuiMixin
+@Mixin(Hud.class)
+public class HudMixin
 {
 	// Renders under the item.
 	@Inject(method = "extractSlot", at = @At("HEAD"))
