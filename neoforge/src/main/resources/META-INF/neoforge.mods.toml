@@ -15,35 +15,35 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="neoforge"
 	type="required"
-	versionRange="[26.1,)"
+	versionRange="[26.2,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="minecraft"
 	type="required"
-	versionRange="[26.1,)"
+	versionRange="[26.2,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="iceberg"
 	type="required"
-	versionRange="[1.4.1,)"
+	versionRange="[1.4.2,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="prism"
 	type="required"
-	versionRange="[1.1.1,)"
+	versionRange="[1.1.2,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="legendarytooltips"
 	type="optional"
-	versionRange="[1.6.1,)"
+	versionRange="[1.6.2,)"
 	ordering="NONE"
 	side="BOTH"
 
