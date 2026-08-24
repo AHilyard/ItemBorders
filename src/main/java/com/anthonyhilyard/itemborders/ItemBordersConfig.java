@@ -1,5 +1,6 @@
 package com.anthonyhilyard.itemborders;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,10 @@ import net.minecraftforge.fml.config.ModConfig;
 
 public class ItemBordersConfig
 {
+	// Not sure how to decide the sweet spot of these.
+	private static final int CACHE_CLEANUP_INTERVAL = 256;
+	private static final int CACHE_LIFESPAN_MS = 30_000;
+
 	public static final ForgeConfigSpec SPEC;
 	public static final ItemBordersConfig INSTANCE;
 	static
@@ -50,7 +55,8 @@ public class ItemBordersConfig
 
 	private record ItemKey(Item item, CompoundTag tag) {}
 
-	private Map<ItemKey, Pair<Supplier<Integer>, Supplier<Integer>>> cachedCustomBorders = new HashMap<ItemKey, Pair<Supplier<Integer>, Supplier<Integer>>>();
+	private final Map<ItemKey, CacheEntry> cachedCustomBorders = new HashMap<>();
+	private int cacheCleanCounter = 0;
 	private boolean emptyCache = true;
 
 	public ItemBordersConfig(ForgeConfigSpec.Builder build)
@@ -174,10 +180,27 @@ public class ItemBordersConfig
 		{
 			emptyCache = false;
 			cachedCustomBorders.clear();
+			cacheCleanCounter = 0;
 		}
-		if (cachedCustomBorders.containsKey(itemKey))
+		else
 		{
-			return cachedCustomBorders.get(itemKey);
+			CacheEntry entry = cachedCustomBorders.get(itemKey);
+			if (entry != null)
+			{
+				return entry.get();
+			}
+		}
+
+		// Prevent memory leak from having too many cache.
+		// For example, an activated Terra Shatterer from Botania creates a cache entry for each tick,
+		// which takes 30kb to 150kb of memory for each entry because of their nbt.
+		if (cacheCleanCounter++ > CACHE_CLEANUP_INTERVAL)
+		{
+			cacheCleanCounter = 0;
+
+			long threshold = System.currentTimeMillis() - CACHE_LIFESPAN_MS;
+			cachedCustomBorders.entrySet()
+					.removeIf(e -> e.getValue().shouldRemove(threshold));
 		}
 
 		// Check the manual border map first.
@@ -196,7 +219,7 @@ public class ItemBordersConfig
 			{
 				if (Selectors.itemMatches(item, (String)value))
 				{
-					cachedCustomBorders.put(itemKey, colors);
+					cachedCustomBorders.put(itemKey, new CacheEntry(colors));
 					return colors;
 				}
 			}
@@ -209,7 +232,7 @@ public class ItemBordersConfig
 					{
 						if (Selectors.itemMatches(item, (String)stringVal))
 						{
-							cachedCustomBorders.put(itemKey, colors);
+							cachedCustomBorders.put(itemKey, new CacheEntry(colors));
 							return colors;
 						}
 					}
@@ -251,7 +274,7 @@ public class ItemBordersConfig
 					final TextColor finalTopColor = topColor;
 					final TextColor finalBottomColor = bottomColor;
 					colors = new Pair<Supplier<Integer>,Supplier<Integer>>(() -> finalTopColor.getValue(), () -> finalBottomColor.getValue());
-					cachedCustomBorders.put(itemKey, colors);
+					cachedCustomBorders.put(itemKey, new CacheEntry(colors));
 					return colors;
 				}
 			}
@@ -278,7 +301,29 @@ public class ItemBordersConfig
 			}
 		}
 
-		cachedCustomBorders.put(itemKey, colors);
+		cachedCustomBorders.put(itemKey, new CacheEntry(colors));
 		return colors;
+	}
+
+	private static class CacheEntry
+	{
+		private long lastAccess = System.currentTimeMillis();
+		private final Pair<Supplier<Integer>, Supplier<Integer>> colors;
+
+		public CacheEntry(Pair<Supplier<Integer>, Supplier<Integer>> colors)
+		{
+			this.colors = colors;
+		}
+
+		public Pair<Supplier<Integer>, Supplier<Integer>> get()
+		{
+			lastAccess = System.currentTimeMillis();
+			return colors;
+		}
+
+		public boolean shouldRemove(long threshold)
+		{
+			return this.lastAccess < threshold;
+		}
 	}
 }
