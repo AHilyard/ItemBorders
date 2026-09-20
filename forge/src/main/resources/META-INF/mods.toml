@@ -15,21 +15,21 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="forge"
 	mandatory=true
-	versionRange="[65,)"
+	versionRange="[66,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[26.2,)"
+	versionRange="[26.3,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.4.2,)"
+	versionRange="[1.4.3,)"
 	ordering="AFTER"
 	side="BOTH"
 
@@ -43,6 +43,6 @@ description="Adds colored borders around items to indicate rarity."
 [[dependencies.itemborders]]
 	modId="legendarytooltips"
 	mandatory=false
-	versionRange="[1.6.2,)"
+	versionRange="[1.6.3,)"
 	ordering="NONE"
 	side="BOTH"

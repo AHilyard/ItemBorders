@@ -33,9 +33,9 @@ subprojects {
 	dependencies {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraftVersion"
 
-		implementation files("../libs/Iceberg-26.2-common-1.4.2.jar")
-		implementation files("../libs/Prism-26.2-common-1.1.2.jar")
-		compileOnly files("../libs/LegendaryTooltips-26.2-common-1.6.2.jar")
+		implementation files("../libs/Iceberg-26.3-common-1.4.3.jar")
+		implementation files("../libs/Prism-26.3-common-1.1.3.jar")
+		compileOnly files("../libs/LegendaryTooltips-26.3-common-1.6.3.jar")
 	}
 
 	java {
