@@ -3,7 +3,7 @@
 	"package": "com.anthonyhilyard.itemborders.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
-		"GuiMixin"
+		"HudMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

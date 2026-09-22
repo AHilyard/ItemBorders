@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[51,)"
+loaderVersion="[53,)"
 license="CC BY-NC-ND 4.0"
 
 [[mods]]
@@ -9,40 +9,40 @@ displayName="Item Borders"
 displayURL="https://anthonyhilyard.com/"
 updateJSONURL="https://mc-update-check.anthonyhilyard.com/513769"
 logoFile="icon.png"
-authors="Grend"
+authors="Grend, Mat0u5"
 description="Adds colored borders around items to indicate rarity."
 
 [[dependencies.itemborders]]
 	modId="forge"
 	mandatory=true
-	versionRange="[51,)"
+	versionRange="[66,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.21.0,)"
+	versionRange="[26.3,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.2.1,)"
+	versionRange="[1.4.3,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="prism"
 	mandatory=true
-	versionRange="[1.0.7,)"
+	versionRange="[1.1.2,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.itemborders]]
 	modId="legendarytooltips"
 	mandatory=false
-	versionRange="[1.4.7,)"
+	versionRange="[1.6.3,)"
 	ordering="NONE"
 	side="BOTH"
